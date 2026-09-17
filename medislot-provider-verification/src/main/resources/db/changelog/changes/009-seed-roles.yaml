@@ -1,0 +1,31 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 009-seed-roles
+      author: medislot
+
+      changes:
+
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: name
+                  value: ADMIN
+
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: name
+                  value: PROVIDER
+
+      rollback:
+
+        - delete:
+            tableName: role
+            where: name = 'ADMIN'
+
+        - delete:
+            tableName: role
+            where: name = 'PROVIDER'

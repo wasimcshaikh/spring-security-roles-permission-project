@@ -1,0 +1,32 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 006-create-role
+      author: medislot
+
+      changes:
+
+        - createTable:
+            tableName: role
+
+            columns:
+
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+      rollback:
+
+        - dropTable:
+            tableName: role

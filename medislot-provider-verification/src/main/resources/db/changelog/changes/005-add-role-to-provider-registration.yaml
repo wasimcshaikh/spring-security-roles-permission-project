@@ -1,0 +1,19 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 005-add-role-to-provider-registration
+      author: medislot
+
+      changes:
+
+        - addColumn:
+            tableName: provider_registration
+
+            columns:
+
+              - column:
+                  name: role
+                  type: VARCHAR(30)
+                  defaultValue: PROVIDER
+                  constraints:
+                    nullable: false

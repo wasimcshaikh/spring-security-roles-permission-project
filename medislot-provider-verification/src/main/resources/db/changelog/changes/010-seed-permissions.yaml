@@ -1,0 +1,97 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 010-seed-permissions
+      author: medislot
+
+      changes:
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: VIEW_DASHBOARD
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: VIEW_PROFILE
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: VIEW_DOCUMENTS
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: UPLOAD_DOCUMENT
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: DELETE_DOCUMENT
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: VIEW_PROVIDERS
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: VIEW_PROVIDER_DETAILS
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: EXPORT_PROVIDERS
+
+      rollback:
+
+        - delete:
+            tableName: permission
+            where: name = 'VIEW_DASHBOARD'
+
+        - delete:
+            tableName: permission
+            where: name = 'VIEW_PROFILE'
+
+        - delete:
+            tableName: permission
+            where: name = 'VIEW_DOCUMENTS'
+
+        - delete:
+            tableName: permission
+            where: name = 'UPLOAD_DOCUMENT'
+
+        - delete:
+            tableName: permission
+            where: name = 'DELETE_DOCUMENT'
+
+        - delete:
+            tableName: permission
+            where: name = 'VIEW_PROVIDERS'
+
+        - delete:
+            tableName: permission
+            where: name = 'VIEW_PROVIDER_DETAILS'
+
+        - delete:
+            tableName: permission
+            where: name = 'EXPORT_PROVIDERS'

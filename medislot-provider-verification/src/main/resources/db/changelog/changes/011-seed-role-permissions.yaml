@@ -1,0 +1,120 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 011-seed-role-permissions
+      author: medislot
+
+      changes:
+
+        # ==========================
+        # ADMIN PERMISSIONS
+        # ==========================
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'ADMIN'
+              AND p.name = 'VIEW_DASHBOARD';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'ADMIN'
+              AND p.name = 'VIEW_PROFILE';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'ADMIN'
+              AND p.name = 'VIEW_DOCUMENTS';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'ADMIN'
+              AND p.name = 'VIEW_PROVIDERS';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'ADMIN'
+              AND p.name = 'VIEW_PROVIDER_DETAILS';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'ADMIN'
+              AND p.name = 'EXPORT_PROVIDERS';
+
+
+        # ==========================
+        # PROVIDER PERMISSIONS
+        # ==========================
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'PROVIDER'
+              AND p.name = 'VIEW_DASHBOARD';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'PROVIDER'
+              AND p.name = 'VIEW_PROFILE';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'PROVIDER'
+              AND p.name = 'VIEW_DOCUMENTS';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'PROVIDER'
+              AND p.name = 'UPLOAD_DOCUMENT';
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r, permission p
+              WHERE r.name = 'PROVIDER'
+              AND p.name = 'DELETE_DOCUMENT';
+
+      rollback:
+
+        - sql:
+            sql: >
+              DELETE FROM role_permission
+              WHERE role_id = (
+                  SELECT id FROM role WHERE name = 'ADMIN'
+              );
+
+        - sql:
+            sql: >
+              DELETE FROM role_permission
+              WHERE role_id = (
+                  SELECT id FROM role WHERE name = 'PROVIDER'
+              );

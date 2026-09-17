@@ -1,0 +1,19 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 004-add-role-to-provider
+      author: medislot
+
+      changes:
+
+        - addColumn:
+            tableName: provider
+
+            columns:
+
+              - column:
+                  name: role
+                  type: VARCHAR(30)
+                  defaultValue: PROVIDER
+                  constraints:
+                    nullable: false
