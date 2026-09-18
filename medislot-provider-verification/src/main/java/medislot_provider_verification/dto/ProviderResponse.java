@@ -1,7 +1,6 @@
 package medislot_provider_verification.dto;
 
 import lombok.*;
-import medislot_provider_verification.entity.Role;
 
 @Getter
 @Setter
@@ -18,7 +17,7 @@ public class ProviderResponse {
 
     private String phoneNumber;
 
-    private Role role;
+    private String role;
 
     private Boolean verified;
 }

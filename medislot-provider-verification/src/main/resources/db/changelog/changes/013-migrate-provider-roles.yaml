@@ -1,0 +1,21 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 013-migrate-provider-roles
+      author: medislot
+
+      changes:
+
+        - sql:
+            sql: >
+              UPDATE provider p
+              SET role_id = r.id
+              FROM role r
+              WHERE r.name = p.role;
+
+      rollback:
+
+        - sql:
+            sql: >
+              UPDATE provider
+              SET role_id = NULL;

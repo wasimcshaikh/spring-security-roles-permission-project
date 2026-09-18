@@ -32,3 +32,24 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/changes/011-seed-role-permissions.yaml
+
+  - include:
+      file: db/changelog/changes/012-add-role-id-to-provider.yaml
+
+  - include:
+      file: db/changelog/changes/013-migrate-provider-roles.yaml
+
+  - include:
+      file: db/changelog/changes/014-make-provider-role-id-required.yaml
+
+  - include:
+      file: db/changelog/changes/015-add-role-id-to-provider-registration.yaml
+
+  - include:
+      file: db/changelog/changes/016-migrate-provider-registration-roles.yaml
+
+  - include:
+      file: db/changelog/changes/017-add-manage-permissions.yaml
+
+  - include:
+      file: db/changelog/changes/018-add-manage-permissions-to-admin.yaml

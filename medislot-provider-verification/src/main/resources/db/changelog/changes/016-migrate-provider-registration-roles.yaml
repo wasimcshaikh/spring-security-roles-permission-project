@@ -1,0 +1,32 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 016-migrate-provider-registration-roles
+      author: medislot
+
+      changes:
+
+        - sql:
+            sql: >
+              UPDATE provider_registration pr
+              SET role_id = r.id
+              FROM role r
+              WHERE r.name = pr.role
+              AND pr.role_id IS NULL;
+
+        - addNotNullConstraint:
+            tableName: provider_registration
+            columnName: role_id
+            columnDataType: BIGINT
+
+      rollback:
+
+        - dropNotNullConstraint:
+            tableName: provider_registration
+            columnName: role_id
+            columnDataType: BIGINT
+
+        - sql:
+            sql: >
+              UPDATE provider_registration
+              SET role_id = NULL;

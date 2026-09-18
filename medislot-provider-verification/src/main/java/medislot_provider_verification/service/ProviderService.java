@@ -20,6 +20,6 @@ public interface ProviderService {
 
     List<ProviderResponse> getAllProviders();
 
-
+    List<RoleResponse> getRegistrationRoles();
 
 }

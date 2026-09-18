@@ -1,0 +1,32 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 018-add-manage-permissions-to-admin
+      author: medislot
+
+      changes:
+
+        - sql:
+            sql: >
+              INSERT INTO role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM role r
+              CROSS JOIN permission p
+              WHERE r.name = 'ADMIN'
+                AND p.name = 'MANAGE_PERMISSIONS';
+
+      rollback:
+
+        - sql:
+            sql: >
+              DELETE FROM role_permission
+              WHERE role_id = (
+                  SELECT id
+                  FROM role
+                  WHERE name = 'ADMIN'
+              )
+              AND permission_id = (
+                  SELECT id
+                  FROM permission
+                  WHERE name = 'MANAGE_PERMISSIONS'
+              );

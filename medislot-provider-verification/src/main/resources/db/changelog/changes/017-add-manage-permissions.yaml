@@ -1,0 +1,20 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 017-add-manage-permissions
+      author: medislot
+
+      changes:
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: MANAGE_PERMISSIONS
+
+      rollback:
+
+        - delete:
+            tableName: permission
+            where: name = 'MANAGE_PERMISSIONS'

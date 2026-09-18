@@ -205,7 +205,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/providers/register",
                                 "/api/providers/verify-otp",
-                                "/api/providers/login"
+                                "/api/providers/login" ,
+                                "/api/providers/registration-roles"
+
                         )
                         .permitAll()
 
@@ -244,7 +246,7 @@ public class SecurityConfig {
                                 "/api/providers/documents"
                         )
                         .hasAuthority("VIEW_PROVIDER_DETAILS")
-                        
+
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/providers/documents/**"
@@ -277,6 +279,11 @@ public class SecurityConfig {
                         )
 
 
+                        .requestMatchers(
+                                "/api/admin/roles/**",
+                                "/api/admin/permissions"
+                        )
+                        .hasAuthority("MANAGE_PERMISSIONS")
 
                         // =========================
                         // ALL OTHER APIs

@@ -18,6 +18,7 @@ public class ProviderController {
 
     private final ProviderService providerService;
 
+
     @PostMapping("/register")
     public ResponseEntity<String> registerProvider(
             @Valid @RequestBody ProviderRegistrationRequest request) {
@@ -69,5 +70,14 @@ public class ProviderController {
                 providerService.getAllProviders();
 
         return ResponseEntity.ok(providers);
+    }
+
+    @GetMapping("/registration-roles")
+    public ResponseEntity<List<RoleResponse>> getRegistrationRoles() {
+
+        List<RoleResponse> roles =
+                providerService.getRegistrationRoles();
+
+        return ResponseEntity.ok(roles);
     }
 }

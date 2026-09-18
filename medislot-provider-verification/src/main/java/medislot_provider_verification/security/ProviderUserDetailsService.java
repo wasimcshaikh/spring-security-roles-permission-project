@@ -5,6 +5,8 @@ import medislot_provider_verification.entity.Provider;
 import medislot_provider_verification.repository.ProviderRepository;
 import medislot_provider_verification.service.PermissionService;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +23,7 @@ public class ProviderUserDetailsService
 
     private final PermissionService permissionService;
 
+    @Transactional(readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
@@ -39,7 +42,7 @@ public class ProviderUserDetailsService
         // 2. Get permissions from database
         Set<String> permissions =
                 permissionService.getPermissionsForRole(
-                        provider.getRole().name()
+                        provider.getRole().getName()
                 );
 
         // 3. Create Spring Security user

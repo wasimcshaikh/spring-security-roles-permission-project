@@ -1,13 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { Box, Paper, Typography } from "@mui/material";
-
 import axios from "axios";
 
 import CommonButton from "../components/CommonButton";
 import CommonForm from "../components/CommonForm";
-
 import signupFields from "../config/signupFields";
 
 function SignupPage() {
@@ -22,8 +19,39 @@ function SignupPage() {
   });
 
   const [error, setError] = useState("");
-
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState([]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/providers/registration-roles"
+        );
+
+        setRoles(response.data);
+      } catch (error) {
+        console.error("Failed to load registration roles", error);
+        setError("Unable to load registration roles");
+      }
+    };
+
+    fetchRoles();
+  }, []);
+
+  const dynamicSignupFields = signupFields.map((field) => {
+    if (field.name === "role") {
+      return {
+        ...field,
+        options: roles.map((role) => ({
+          value: role.name,
+          label: role.name,
+        })),
+      };
+    }
+
+    return field;
+  });
 
   const pageSx = {
     minHeight: "100vh",
@@ -33,7 +61,6 @@ function SignupPage() {
     px: { xs: 2, sm: 3 },
     py: { xs: 4, sm: 6 },
     background: "#123b4a",
-    //   "linear-gradient(135deg, #67c8f6 0%, #f8fbff 52%, #e9f7f3 100%)",
   };
 
   const cardSx = {
@@ -65,7 +92,6 @@ function SignupPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setError("");
 
     try {
@@ -75,11 +101,6 @@ function SignupPage() {
         "http://localhost:8080/api/providers/register",
         formData,
       );
-
-      /*
-       * Store email temporarily.
-       * OTP page will use this email.
-       */
 
       sessionStorage.setItem("registrationEmail", formData.email);
 
@@ -98,8 +119,6 @@ function SignupPage() {
   return (
     <Box sx={pageSx}>
       <Paper elevation={0} sx={cardSx}>
-        {/* Heading */}
-
         <Typography
           variant="h4"
           align="center"
@@ -119,8 +138,6 @@ function SignupPage() {
           Create Provider Account
         </Typography>
 
-        {/* Sign In / Sign Up */}
-
         <Box sx={tabsSx}>
           <CommonButton
             text="Sign In"
@@ -131,10 +148,8 @@ function SignupPage() {
           <CommonButton text="Sign Up" />
         </Box>
 
-        {/* Dynamic Signup Form */}
-
         <CommonForm
-          fields={signupFields}
+          fields={dynamicSignupFields}
           formData={formData}
           onChange={handleChange}
           onSubmit={handleSubmit}

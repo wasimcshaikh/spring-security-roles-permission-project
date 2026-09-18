@@ -1,0 +1,19 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 014-make-provider-role-id-required
+      author: medislot
+
+      changes:
+
+        - addNotNullConstraint:
+            tableName: provider
+            columnName: role_id
+            columnDataType: BIGINT
+
+      rollback:
+
+        - dropNotNullConstraint:
+            tableName: provider
+            columnName: role_id
+            columnDataType: BIGINT

@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import MyProfile from "./pages/MyProfile";
 import ViewProviders from "./pages/ViewProviders";
 import ProviderDocuments from "./pages/ProviderDocuments";
+import RolesAndPermissions from "./pages/RolesAndPermissions";
 
 function App() {
   return (
@@ -23,15 +24,11 @@ function App() {
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/providers" element={<ViewProviders />} />
         <Route path="/provider-documents" element={<ProviderDocuments />} />
+        <Route path="/roles-permissions" element={<RolesAndPermissions />} />
         <Route
           path="/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["PROVIDER"]}>
-              {" "}
-              <Dashboard />{" "}
-            </ProtectedRoute>
-          }
-        />{" "}
+          element={<Dashboard />}  />
+       
         {/* Admin */}{" "}
         <Route
           path="/provider-export"

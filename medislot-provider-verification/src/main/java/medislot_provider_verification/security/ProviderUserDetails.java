@@ -28,7 +28,7 @@ public class ProviderUserDetails implements UserDetails {
         // ROLE
         authorities.add(
                 new SimpleGrantedAuthority(
-                        "ROLE_" + provider.getRole().name()
+                        "ROLE_" + provider.getRole().getName()
                 )
         );
 

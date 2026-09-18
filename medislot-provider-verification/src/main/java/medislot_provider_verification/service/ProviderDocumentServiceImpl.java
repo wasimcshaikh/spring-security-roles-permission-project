@@ -48,8 +48,7 @@ public class ProviderDocumentServiceImpl
                                 )
                         );
 
-        if(provider.getRole() == Role.ADMIN)
-        {
+        if ("ADMIN".equals(provider.getRole().getName())) {
             throw new InvalidAccessException(
                     "Cannot upload document for admin"
             );

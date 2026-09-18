@@ -4,15 +4,17 @@ import lombok.RequiredArgsConstructor;
 import medislot_provider_verification.dto.*;
 import medislot_provider_verification.entity.Provider;
 import medislot_provider_verification.entity.ProviderRegistration;
-import medislot_provider_verification.entity.Role;
+import medislot_provider_verification.entity.RoleEntity;
 import medislot_provider_verification.exception.*;
 import medislot_provider_verification.repository.ProviderRegistrationRepository;
 import medislot_provider_verification.repository.ProviderRepository;
+import medislot_provider_verification.repository.RoleRepository;
 import medislot_provider_verification.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.stereotype.Service;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,13 +29,17 @@ public class ProviderServiceImpl implements ProviderService {
     private final ProviderRepository providerRepository;
     private final EmailService emailService;
 
+    private final RoleRepository roleRepository;
+
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
     private final PermissionService permissionService;
 
+
     @Override
-    public void registerProvider(ProviderRegistrationRequest request) {
+    public void registerProvider(
+            ProviderRegistrationRequest request) {
 
         // 1. Check whether provider already exists
         if (providerRepository
@@ -45,6 +51,7 @@ public class ProviderServiceImpl implements ProviderService {
             );
         }
 
+
         // 2. Check whether registration is already in progress
         if (providerRegistrationRepository
                 .findByEmail(request.getEmail())
@@ -55,17 +62,31 @@ public class ProviderServiceImpl implements ProviderService {
             );
         }
 
-        // 3. Generate OTP
+
+        // 3. Find role from database
+        RoleEntity roleEntity =
+                roleRepository
+                        .findByName(request.getRole())
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Role not found: "
+                                                + request.getRole()
+                                )
+                        );
+
+
+        // 4. Generate OTP
         String otp = generateOtp();
 
-        // 4. Create temporary registration
+
+        // 5. Create temporary registration
         ProviderRegistration registration =
                 ProviderRegistration.builder()
                         .fullName(request.getFullName())
                         .email(request.getEmail())
                         .phoneNumber(request.getPhoneNumber())
                         .password(request.getPassword())
-                        .role(request.getRole())
+                        .role(roleEntity)
                         .otp(otp)
                         .otpExpiresAt(
                                 LocalDateTime.now().plusMinutes(5)
@@ -74,20 +95,24 @@ public class ProviderServiceImpl implements ProviderService {
                         .createdAt(LocalDateTime.now())
                         .build();
 
-        // 5. Save registration
+
+        // 6. Save registration
         providerRegistrationRepository.save(registration);
 
-        // 6. Send OTP to provider's email
+
+        // 7. Send OTP
         emailService.sendOtpEmail(
                 request.getEmail(),
                 otp
         );
     }
 
-    @Override
-    public void verifyOtp(VerifyOtpRequest request) {
 
-        // 1. Find pending registration using email
+    @Override
+    public void verifyOtp(
+            VerifyOtpRequest request) {
+
+        // 1. Find pending registration
         ProviderRegistration registration =
                 providerRegistrationRepository
                         .findByEmail(request.getEmail())
@@ -97,7 +122,8 @@ public class ProviderServiceImpl implements ProviderService {
                                 )
                         );
 
-        // 2. Check whether OTP has expired
+
+        // 2. Check OTP expiry
         if (LocalDateTime.now()
                 .isAfter(registration.getOtpExpiresAt())) {
 
@@ -106,58 +132,91 @@ public class ProviderServiceImpl implements ProviderService {
             );
         }
 
-        // 3. Check whether OTP is correct
-        if (!registration.getOtp().equals(request.getOtp())) {
+
+        // 3. Check OTP
+        if (!registration.getOtp()
+                .equals(request.getOtp())) {
 
             registration.setOtpAttempts(
                     registration.getOtpAttempts() + 1
             );
 
-            providerRegistrationRepository.save(registration);
+            providerRegistrationRepository.save(
+                    registration
+            );
 
             throw new InvalidOtpException(
                     "Invalid OTP"
             );
         }
 
-        // 4. OTP is correct → create permanent Provider
-        Provider provider = Provider.builder()
-                .fullName(registration.getFullName())
-                .email(registration.getEmail())
-                .phoneNumber(registration.getPhoneNumber())
-                .password(registration.getPassword())
-                .role(registration.getRole())
-                .verified(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
 
-        // 5. Save permanent Provider
+        // 4. Create permanent provider
+        // RoleEntity is already stored in registration
+        Provider provider =
+                Provider.builder()
+                        .fullName(
+                                registration.getFullName()
+                        )
+                        .email(
+                                registration.getEmail()
+                        )
+                        .phoneNumber(
+                                registration.getPhoneNumber()
+                        )
+                        .password(
+                                registration.getPassword()
+                        )
+                        .role(
+                                registration.getRole()
+                        )
+                        .verified(true)
+                        .createdAt(
+                                LocalDateTime.now()
+                        )
+                        .updatedAt(
+                                LocalDateTime.now()
+                        )
+                        .build();
+
+
+        // 5. Save provider
         providerRepository.save(provider);
 
+
         // 6. Delete temporary registration
-        providerRegistrationRepository.delete(registration);
+        providerRegistrationRepository.delete(
+                registration
+        );
     }
+
 
     private String generateOtp() {
 
-        int otp = 100000 + new Random().nextInt(900000);
+        int otp =
+                100000 +
+                        new Random().nextInt(900000);
 
         return String.valueOf(otp);
     }
 
-    @Override
-    public LoginResponse login(ProviderLoginRequest request) {
 
-        // 1. Check whether email exists
+    @Override
+    public LoginResponse login(
+            ProviderLoginRequest request) {
+
+        // 1. Find provider
         Provider provider =
                 providerRepository
-                        .findByEmail(request.getEmail())
+                        .findByEmail(
+                                request.getEmail()
+                        )
                         .orElseThrow(() ->
                                 new InvalidCredentialsException(
                                         "Email address is not registered"
                                 )
                         );
+
 
         // 2. Authenticate password
         try {
@@ -176,24 +235,36 @@ public class ProviderServiceImpl implements ProviderService {
             );
         }
 
-        // 3. Get permissions from database
+
+        // 3. Get current permissions from database
         Set<String> permissions =
-                permissionService.getPermissionsForRole(
-                        provider.getRole().name()
-                );
+                permissionService
+                        .getPermissionsForRole(
+                                provider
+                                        .getRole()
+                                        .getName()
+                        );
+
 
         // 4. Generate JWT
         String token =
-                jwtService.generateToken(provider);
+                jwtService.generateToken(
+                        provider
+                );
 
-        // 5. Return provider information + permissions
+
+        // 5. Return login response
         return LoginResponse.builder()
                 .token(token)
                 .id(provider.getId())
                 .fullName(provider.getFullName())
                 .email(provider.getEmail())
                 .phoneNumber(provider.getPhoneNumber())
-                .role(provider.getRole())
+                .role(
+                        provider
+                                .getRole()
+                                .getName()
+                )
                 .verified(provider.getVerified())
                 .permissions(permissions)
                 .build();
@@ -201,65 +272,111 @@ public class ProviderServiceImpl implements ProviderService {
 
 
     @Override
-    public ProviderResponse getProviderById(Long providerId) {
+    public ProviderResponse getProviderById(
+            Long providerId) {
 
         Provider provider =
-                providerRepository.findById(providerId)
+                providerRepository
+                        .findById(providerId)
                         .orElseThrow(() ->
                                 new ProviderNotFoundException(
-                                        "Provider not found with id: " + providerId
+                                        "Provider not found with id: "
+                                                + providerId
                                 )
                         );
+
 
         return ProviderResponse.builder()
                 .id(provider.getId())
                 .fullName(provider.getFullName())
                 .email(provider.getEmail())
                 .phoneNumber(provider.getPhoneNumber())
-                .role(provider.getRole())
+                .role(
+                        provider
+                                .getRole()
+                                .getName()
+                )
                 .verified(provider.getVerified())
                 .build();
     }
 
 
     @Override
-    public ProviderResponse getProviderByEmail(String email) {
+    public ProviderResponse getProviderByEmail(
+            String email) {
 
         Provider provider =
-                providerRepository.findByEmail(email)
+                providerRepository
+                        .findByEmail(email)
                         .orElseThrow(() ->
                                 new ProviderNotFoundException(
                                         "Provider not found"
                                 )
                         );
 
+
         return ProviderResponse.builder()
                 .id(provider.getId())
                 .fullName(provider.getFullName())
                 .email(provider.getEmail())
                 .phoneNumber(provider.getPhoneNumber())
-                .role(provider.getRole())
+                .role(
+                        provider
+                                .getRole()
+                                .getName()
+                )
                 .verified(provider.getVerified())
                 .build();
     }
+
 
     @Override
     public List<ProviderResponse> getAllProviders() {
 
         List<Provider> providers =
-                providerRepository.findByRole(Role.PROVIDER);
+                providerRepository
+                        .findByRoleNameNotOrderByIdAsc(
+                                "ADMIN"
+                        );
+
 
         return providers.stream()
-                .map(provider -> ProviderResponse.builder()
-                        .id(provider.getId())
-                        .fullName(provider.getFullName())
-                        .email(provider.getEmail())
-                        .phoneNumber(provider.getPhoneNumber())
-                        .role(provider.getRole())
-                        .verified(provider.getVerified())
-                        .build())
+                .map(provider ->
+                        ProviderResponse.builder()
+                                .id(provider.getId())
+                                .fullName(
+                                        provider.getFullName()
+                                )
+                                .email(
+                                        provider.getEmail()
+                                )
+                                .phoneNumber(
+                                        provider.getPhoneNumber()
+                                )
+                                .role(
+                                        provider
+                                                .getRole()
+                                                .getName()
+                                )
+                                .verified(
+                                        provider.getVerified()
+                                )
+                                .build()
+                )
                 .toList();
     }
 
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<RoleResponse> getRegistrationRoles() {
+
+        return roleRepository.findAll()
+                .stream()
+                .map(role -> RoleResponse.builder()
+                        .id(role.getId())
+                        .name(role.getName())
+                        .build())
+                .toList();
+    }
 }

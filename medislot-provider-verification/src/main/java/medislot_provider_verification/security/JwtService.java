@@ -34,7 +34,7 @@ public class JwtService {
 
                 .claim("providerId", provider.getId())
                 .claim("email", provider.getEmail())
-                .claim("role", provider.getRole().name())
+                .claim("role", provider.getRole().getName())
 
                 .issuedAt(new Date())
 

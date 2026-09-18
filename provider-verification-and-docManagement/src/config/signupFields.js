@@ -27,16 +27,7 @@ const signupFields = [
     label: "Role",
     type: "select",
     required: true,
-    options: [
-      {
-        value: "PROVIDER",
-        label: "Provider",
-      },
-      {
-        value: "ADMIN",
-        label: "Admin",
-      },
-    ],
+    options: [],
   },
 ];
 

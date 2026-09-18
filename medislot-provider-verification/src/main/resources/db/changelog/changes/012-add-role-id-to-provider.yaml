@@ -1,0 +1,33 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 012-add-role-id-to-provider
+      author: medislot
+
+      changes:
+
+        - addColumn:
+            tableName: provider
+
+            columns:
+
+              - column:
+                  name: role_id
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableName: provider
+            baseColumnNames: role_id
+            referencedTableName: role
+            referencedColumnNames: id
+            constraintName: fk_provider_role
+
+      rollback:
+
+        - dropForeignKeyConstraint:
+            baseTableName: provider
+            constraintName: fk_provider_role
+
+        - dropColumn:
+            tableName: provider
+            columnName: role_id
