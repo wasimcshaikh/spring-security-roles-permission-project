@@ -1,0 +1,20 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 019-add-view-admin-dashboard-permission
+      author: medislot
+
+      changes:
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: VIEW_ADMIN_DASHBOARD
+
+      rollback:
+
+        - delete:
+            tableName: permission
+            where: name = 'VIEW_ADMIN_DASHBOARD'

@@ -255,6 +255,11 @@ public class SecurityConfig {
                                 "VIEW_DOCUMENTS"
                         )
 
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/providers/counts-by-role"
+                        )
+                        .hasAuthority("VIEW_ADMIN_DASHBOARD")
 
                         // =========================
                         // DELETE DOCUMENT
@@ -284,6 +289,19 @@ public class SecurityConfig {
                                 "/api/admin/permissions"
                         )
                         .hasAuthority("MANAGE_PERMISSIONS")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/video/session"
+                        )
+                        .hasAuthority("VIDEO_CALL")
+
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/video-calls"
+                        )
+                        .hasAuthority("VIDEO_CALL")
 
                         // =========================
                         // ALL OTHER APIs

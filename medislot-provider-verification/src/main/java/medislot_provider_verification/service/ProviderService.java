@@ -3,6 +3,9 @@ package medislot_provider_verification.service;
 import medislot_provider_verification.dto.*;
 
 import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.jpa.repository.Query;
 
 public interface ProviderService {
 
@@ -21,5 +24,7 @@ public interface ProviderService {
     List<ProviderResponse> getAllProviders();
 
     List<RoleResponse> getRegistrationRoles();
+
+    Map<String, Long> getUserCountsByRole();
 
 }

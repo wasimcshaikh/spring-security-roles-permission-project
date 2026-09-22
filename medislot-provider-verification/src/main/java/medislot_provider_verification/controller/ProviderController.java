@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/providers")
@@ -79,5 +80,15 @@ public class ProviderController {
                 providerService.getRegistrationRoles();
 
         return ResponseEntity.ok(roles);
+    }
+
+
+    @GetMapping("/counts-by-role")
+    public ResponseEntity<Map<String, Long>> getUserCountsByRole() {
+
+        Map<String, Long> counts =
+                providerService.getUserCountsByRole();
+
+        return ResponseEntity.ok(counts);
     }
 }

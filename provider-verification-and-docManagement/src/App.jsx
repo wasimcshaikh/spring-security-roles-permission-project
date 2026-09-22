@@ -12,6 +12,7 @@ import MyProfile from "./pages/MyProfile";
 import ViewProviders from "./pages/ViewProviders";
 import ProviderDocuments from "./pages/ProviderDocuments";
 import RolesAndPermissions from "./pages/RolesAndPermissions";
+import VideoCalls from "./pages/VideoCalls";
 
 function App() {
   return (
@@ -25,10 +26,8 @@ function App() {
         <Route path="/providers" element={<ViewProviders />} />
         <Route path="/provider-documents" element={<ProviderDocuments />} />
         <Route path="/roles-permissions" element={<RolesAndPermissions />} />
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}  />
-       
+        <Route path="/video-calls" element={<VideoCalls />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         {/* Admin */}{" "}
         <Route
           path="/provider-export"

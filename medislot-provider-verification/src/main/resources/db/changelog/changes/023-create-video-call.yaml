@@ -1,0 +1,86 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 021-create-video-call
+      author: medislot
+
+      changes:
+
+        - createTable:
+            tableName: video_call
+
+            columns:
+
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: provider_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: client_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_by
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: session_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: session_passcode
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: scheduled_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: duration_minutes
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+      rollback:
+
+        - dropTable:
+            tableName: video_call

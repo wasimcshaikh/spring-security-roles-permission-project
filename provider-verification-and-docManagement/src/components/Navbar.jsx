@@ -13,21 +13,19 @@ import {
 } from "@mui/material";
 
 import LogoutIcon from "@mui/icons-material/Logout";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
 
 import CommonButton from "./CommonButton";
 
 import { getCurrentUser, logout } from "../utils/auth";
-import {
-  canAccessNavigationItem,
-} from "../utils/permissions";
+import { canAccessNavigationItem } from "../utils/permissions";
 
 import { navigationItems } from "../config/navigation";
 
 function Navbar() {
   const navigate = useNavigate();
 
-  const [openLogoutDialog, setOpenLogoutDialog] =
-    useState(false);
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
 
   const user = getCurrentUser();
 
@@ -37,10 +35,9 @@ function Navbar() {
    * Filter navigation items based on
    * current user's role and permissions.
    */
-  const visibleNavigationItems =
-    navigationItems.filter(
-      canAccessNavigationItem
-    );
+  const visibleNavigationItems = navigationItems.filter(
+    canAccessNavigationItem,
+  );
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -68,8 +65,7 @@ function Navbar() {
         position="static"
         elevation={0}
         sx={{
-          background:
-            "linear-gradient(90deg, #0f172a 0%, #164e63 100%)",
+          background: "linear-gradient(90deg, #0f172a 0%, #164e63 100%)",
         }}
       >
         <Toolbar
@@ -127,9 +123,7 @@ function Navbar() {
             }}
           >
             {visibleNavigationItems
-              .filter(
-                (item) => item.path !== "/home"
-              )
+              .filter((item) => item.path !== "/home")
               .map((item) => (
                 <CommonButton
                   key={item.path}
@@ -139,9 +133,7 @@ function Navbar() {
                   fullWidth={false}
                   size="medium"
                   startIcon={item.icon}
-                  onClick={() =>
-                    handleNavigation(item.path)
-                  }
+                  onClick={() => handleNavigation(item.path)}
                   sx={{
                     whiteSpace: "nowrap",
                     color: "#ffffff",
@@ -149,20 +141,35 @@ function Navbar() {
                     boxShadow: "none",
 
                     "&:hover": {
-                      backgroundColor:
-                        "rgba(255,255,255,0.1)",
+                      backgroundColor: "rgba(255,255,255,0.1)",
                     },
                   }}
                 />
               ))}
 
+            <CommonButton
+              text="Join Video Call"
+              variant="text"
+              color="inherit"
+              fullWidth={false}
+              size="medium"
+              startIcon={<VideoCallIcon />}
+              onClick={() => handleNavigation("/video-calls")}
+              sx={{
+                whiteSpace: "nowrap",
+                color: "#ffffff",
+                px: 1.5,
+                boxShadow: "none",
+
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                },
+              }}
+            />
+
             {/* Logout */}
             <CommonButton
-              text={
-                role === "ADMIN"
-                  ? "Signout"
-                  : "Logout"
-              }
+              text={role === "ADMIN" ? "Signout" : "Logout"}
               variant="outlined"
               color="inherit"
               fullWidth={false}
@@ -172,14 +179,12 @@ function Navbar() {
               sx={{
                 whiteSpace: "nowrap",
                 color: "#ffffff",
-                borderColor:
-                  "rgba(255,255,255,0.5)",
+                borderColor: "rgba(255,255,255,0.5)",
                 boxShadow: "none",
 
                 "&:hover": {
                   borderColor: "#ffffff",
-                  backgroundColor:
-                    "rgba(255,255,255,0.1)",
+                  backgroundColor: "rgba(255,255,255,0.1)",
                 },
               }}
             />
@@ -188,17 +193,10 @@ function Navbar() {
       </AppBar>
 
       {/* Logout Confirmation Dialog */}
-      <Dialog
-        open={openLogoutDialog}
-        onClose={handleLogoutCancel}
-      >
-        <DialogTitle>
-          Confirm Logout
-        </DialogTitle>
+      <Dialog open={openLogoutDialog} onClose={handleLogoutCancel}>
+        <DialogTitle>Confirm Logout</DialogTitle>
 
-        <DialogContent>
-          Are you sure you want to logout?
-        </DialogContent>
+        <DialogContent>Are you sure you want to logout?</DialogContent>
 
         <DialogActions
           sx={{

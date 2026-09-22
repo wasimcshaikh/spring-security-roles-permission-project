@@ -18,8 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -378,5 +380,17 @@ public class ProviderServiceImpl implements ProviderService {
                         .name(role.getName())
                         .build())
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Long> getUserCountsByRole() {
+
+        return providerRepository.countProvidersByRole()
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0],
+                        row -> (Long) row[1]
+                ));
     }
 }

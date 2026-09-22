@@ -1,6 +1,7 @@
 package medislot_provider_verification.security;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import medislot_provider_verification.entity.Provider;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+@Getter
 @AllArgsConstructor
 public class ProviderUserDetails implements UserDetails {
 
