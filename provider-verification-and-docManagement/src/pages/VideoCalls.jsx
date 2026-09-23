@@ -9,7 +9,8 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
-
+// import { ZoomMtg } from '@zoom/meetingsdk'
+// import ZoomMtgEmbedded from '@zoom/meetingsdk/embedded'
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import VideoCallRoom from "../components/VideoCall/VideoCallRoom";
 
@@ -50,6 +51,8 @@ function VideoCalls() {
   const handleJoinCall = async (videoCallId) => {
     try {
       setJoiningCallId(videoCallId);
+
+      console.log("Joining video call with ID:", videoCallId);
 
       setError("");
 
@@ -210,6 +213,7 @@ function VideoCalls() {
 
       {/* Temporary Session Information */}
 
+      {/* <ZoomMtg key={'video'}  /> */}
       {session && (
         <VideoCallRoom session={session} onLeave={() => setSession(null)} />
       )}

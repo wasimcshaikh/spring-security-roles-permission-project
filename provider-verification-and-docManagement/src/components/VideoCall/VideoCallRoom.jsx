@@ -1,8 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   Box,
@@ -21,35 +17,24 @@ import CallEndIcon from "@mui/icons-material/CallEnd";
 
 import ZoomVideo from "@zoom/videosdk";
 
-function VideoCallRoom({
-  session,
-  onLeave,
-}) {
-
+function VideoCallRoom({ session, onLeave }) {
   const clientRef = useRef(null);
 
   const streamRef = useRef(null);
 
-  const videoContainerRef =
-    useRef(null);
+  const videoContainerRef = useRef(null);
 
-  const [joining, setJoining] =
-    useState(true);
+  const [joining, setJoining] = useState(true);
 
-  const [joined, setJoined] =
-    useState(false);
+  const [joined, setJoined] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
-  const [audioEnabled, setAudioEnabled] =
-    useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
 
-  const [videoEnabled, setVideoEnabled] =
-    useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(false);
 
   useEffect(() => {
-
     if (!session) {
       return;
     }
@@ -59,118 +44,100 @@ function VideoCallRoom({
     return () => {
       leaveZoomSession();
     };
-
   }, [session]);
 
   const joinZoomSession = async () => {
-
     try {
-
       setJoining(true);
       setError("");
 
       /*
        * Create Zoom Video SDK client
        */
-      const client =
-        ZoomVideo.createClient();
+
+      console.log("session created");
+      
+      const client = ZoomVideo.createClient();
 
       clientRef.current = client;
+
+
 
       /*
        * Initialize Zoom Video SDK
        */
-      await client.init(
-        "en-US",
-        "Global",
-        {
-          patchJsMedia: true,
-          leaveOnPageUnload: true,
-        }
-      );
+      await client.init("en-US", "Global", {
+        patchJsMedia: true,
+        leaveOnPageUnload: true,
+      });
 
       /*
        * Get current logged-in user
        */
-      const storedUser =
-        sessionStorage.getItem(
-          "provider"
-        );
+      const storedUser = sessionStorage.getItem("provider");
 
       let userName = "MediSlot User";
 
       if (storedUser) {
-
         try {
-
-          const user =
-            JSON.parse(storedUser);
+          const user = JSON.parse(storedUser);
 
           userName =
-            user.fullName ||
-            user.name ||
-            user.email ||
-            "MediSlot User";
-
+            user.fullName || user.name || user.email || "MediSlot User";
         } catch (error) {
-
-          console.error(
-            "Failed to read logged-in user:",
-            error
-          );
-
+          console.error("Failed to read logged-in user:", error);
         }
       }
+
+      console.log("========== ZOOM JOIN DATA ==========");
+
+      console.log("Session object:", session);
+
+      console.log("Session name:", session.sessionName);
+
+      console.log("Token exists:", Boolean(session.token));
+
+      console.log("Token length:", session.token?.length);
+
+      console.log("User name:", userName);
+
+      console.log("====================================");
 
       /*
        * Join Zoom session
        */
-      await client.join(
-        session.sessionName,
-        session.token,
-        userName,
-        ""
-      );
+      console.log("Joining Zoom session...");
+      await client.join(session.sessionName, session.token, userName);
+
+      console.log("Successfully joined Zoom session");
 
       /*
        * Get media stream
        */
-      const stream =
-        client.getMediaStream();
+      const stream = client.getMediaStream();
+
+      console.log("Zoom media stream:", stream);
 
       streamRef.current = stream;
 
       setJoined(true);
+      console.log("set Joined to true");
       setJoining(false);
+      console.log("set Joining to false");
 
-      console.log(
-        "Successfully joined Zoom session"
-      );
-
+      console.log("Successfully joined Zoom session");
     } catch (error) {
+      console.error("Failed to join Zoom session:", error);
 
-      console.error(
-        "Failed to join Zoom session:",
-        error
-      );
-
-      setError(
-        error?.reason ||
-        error?.message ||
-        "Failed to join video call"
-      );
+      setError(error?.reason || error?.message || "Failed to join video call");
 
       setJoining(false);
-
     }
   };
 
   const startVideo = async () => {
-
     try {
-
-      const stream =
-        streamRef.current;
+      const stream = streamRef.current;
 
       if (!stream) {
         return;
@@ -183,9 +150,7 @@ function VideoCallRoom({
       /*
        * Get current user
        */
-      const currentUser =
-        clientRef.current
-          ?.getCurrentUserInfo();
+      const currentUser = clientRef.current?.getCurrentUserInfo();
 
       if (!currentUser) {
         return;
@@ -194,152 +159,91 @@ function VideoCallRoom({
       /*
        * Render current user's video
        */
-      const userVideo =
-        await stream.attachVideo(
-          currentUser.userId,
-          3
-        );
+      const userVideo = await stream.attachVideo(currentUser.userId, 3);
 
-      if (
-        videoContainerRef.current &&
-        userVideo
-      ) {
-
-        videoContainerRef.current
-          .appendChild(userVideo);
-
+      if (videoContainerRef.current && userVideo) {
+        videoContainerRef.current.appendChild(userVideo);
       }
-
     } catch (error) {
+      console.error("Failed to start video:", error);
 
-      console.error(
-        "Failed to start video:",
-        error
-      );
-
-      setError(
-        "Unable to start camera. Please check camera permissions."
-      );
-
+      setError("Unable to start camera. Please check camera permissions.");
     }
   };
 
   const stopVideo = async () => {
-
     try {
-
-      const stream =
-        streamRef.current;
+      const stream = streamRef.current;
 
       if (!stream) {
         return;
       }
 
-      const currentUser =
-        clientRef.current
-          ?.getCurrentUserInfo();
+      const currentUser = clientRef.current?.getCurrentUserInfo();
 
       if (currentUser) {
-
-        await stream.detachVideo(
-          currentUser.userId
-        );
-
+        await stream.detachVideo(currentUser.userId);
       }
 
       await stream.stopVideo();
 
       setVideoEnabled(false);
-
     } catch (error) {
-
-      console.error(
-        "Failed to stop video:",
-        error
-      );
-
+      console.error("Failed to stop video:", error);
     }
   };
 
   const toggleAudio = async () => {
-
     try {
-
-      const stream =
-        streamRef.current;
+      const stream = streamRef.current;
 
       if (!stream) {
         return;
       }
 
       if (!audioEnabled) {
-
         await stream.startAudio();
 
         setAudioEnabled(true);
-
       } else {
-
         await stream.muteAudio();
 
         setAudioEnabled(false);
-
       }
-
     } catch (error) {
-
-      console.error(
-        "Failed to toggle audio:",
-        error
-      );
+      console.error("Failed to toggle audio:", error);
 
       setError(
-        "Unable to access microphone. Please check microphone permissions."
+        "Unable to access microphone. Please check microphone permissions.",
       );
-
     }
   };
 
   const leaveZoomSession = async () => {
-
     try {
-
       if (clientRef.current) {
-
         await clientRef.current.leave();
-
       }
-
     } catch (error) {
-
-      console.error(
-        "Failed to leave Zoom session:",
-        error
-      );
-
+      console.error("Failed to leave Zoom session:", error);
     } finally {
-
       clientRef.current = null;
       streamRef.current = null;
-
     }
   };
 
   const handleLeave = async () => {
-
     await leaveZoomSession();
 
     if (onLeave) {
       onLeave();
     }
-
   };
 
   /*
    * Loading screen
    */
   if (joining) {
-
     return (
       <Box
         sx={{
@@ -351,47 +255,32 @@ function VideoCallRoom({
           gap: 2,
         }}
       >
-
         <CircularProgress />
 
-        <Typography>
-          Joining video call...
-        </Typography>
-
+        <Typography>Joining video call...</Typography>
       </Box>
     );
-
   }
 
   /*
    * Error screen
    */
   if (error && !joined) {
-
     return (
       <Box
         sx={{
           p: 4,
         }}
       >
-
-        <Alert
-          severity="error"
-          sx={{ mb: 2 }}
-        >
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
 
-        <Button
-          variant="outlined"
-          onClick={handleLeave}
-        >
+        <Button variant="outlined" onClick={handleLeave}>
           Back
         </Button>
-
       </Box>
     );
-
   }
 
   /*
@@ -411,7 +300,6 @@ function VideoCallRoom({
         flexDirection: "column",
       }}
     >
-
       {/* Header */}
 
       <Box
@@ -422,9 +310,7 @@ function VideoCallRoom({
           mb: 2,
         }}
       >
-
         <Box>
-
           <Typography
             variant="h5"
             sx={{
@@ -443,7 +329,6 @@ function VideoCallRoom({
           >
             Session: {session.sessionName}
           </Typography>
-
         </Box>
 
         <Typography
@@ -452,25 +337,17 @@ function VideoCallRoom({
             opacity: 0.8,
           }}
         >
-          {videoEnabled
-            ? "Camera On"
-            : "Camera Off"}
+          {videoEnabled ? "Camera On" : "Camera Off"}
         </Typography>
-
       </Box>
-
 
       {/* Error */}
 
       {error && (
-        <Alert
-          severity="warning"
-          sx={{ mb: 2 }}
-        >
+        <Alert severity="warning" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
-
 
       {/* Video Area */}
 
@@ -489,7 +366,6 @@ function VideoCallRoom({
           justifyContent: "center",
         }}
       >
-
         <Box
           ref={videoContainerRef}
           sx={{
@@ -504,7 +380,6 @@ function VideoCallRoom({
             },
           }}
         >
-
           {!videoEnabled && (
             <Box
               sx={{
@@ -515,7 +390,6 @@ function VideoCallRoom({
                 justifyContent: "center",
               }}
             >
-
               <Typography
                 sx={{
                   opacity: 0.6,
@@ -523,14 +397,10 @@ function VideoCallRoom({
               >
                 Camera is turned off
               </Typography>
-
             </Box>
           )}
-
         </Box>
-
       </Box>
-
 
       {/* Controls */}
 
@@ -543,7 +413,6 @@ function VideoCallRoom({
           mt: 3,
         }}
       >
-
         {/* Microphone */}
 
         <IconButton
@@ -551,70 +420,34 @@ function VideoCallRoom({
           sx={{
             width: 56,
             height: 56,
-            backgroundColor:
-              audioEnabled
-                ? "#ffffff"
-                : "#334155",
-            color:
-              audioEnabled
-                ? "#0f172a"
-                : "#ffffff",
+            backgroundColor: audioEnabled ? "#ffffff" : "#334155",
+            color: audioEnabled ? "#0f172a" : "#ffffff",
 
             "&:hover": {
-              backgroundColor:
-                audioEnabled
-                  ? "#e2e8f0"
-                  : "#475569",
+              backgroundColor: audioEnabled ? "#e2e8f0" : "#475569",
             },
           }}
         >
-
-          {audioEnabled ? (
-            <MicIcon />
-          ) : (
-            <MicOffIcon />
-          )}
-
+          {audioEnabled ? <MicIcon /> : <MicOffIcon />}
         </IconButton>
-
 
         {/* Camera */}
 
         <IconButton
-          onClick={
-            videoEnabled
-              ? stopVideo
-              : startVideo
-          }
+          onClick={videoEnabled ? stopVideo : startVideo}
           sx={{
             width: 56,
             height: 56,
-            backgroundColor:
-              videoEnabled
-                ? "#ffffff"
-                : "#334155",
-            color:
-              videoEnabled
-                ? "#0f172a"
-                : "#ffffff",
+            backgroundColor: videoEnabled ? "#ffffff" : "#334155",
+            color: videoEnabled ? "#0f172a" : "#ffffff",
 
             "&:hover": {
-              backgroundColor:
-                videoEnabled
-                  ? "#e2e8f0"
-                  : "#475569",
+              backgroundColor: videoEnabled ? "#e2e8f0" : "#475569",
             },
           }}
         >
-
-          {videoEnabled ? (
-            <VideocamIcon />
-          ) : (
-            <VideocamOffIcon />
-          )}
-
+          {videoEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
         </IconButton>
-
 
         {/* Leave */}
 
@@ -631,13 +464,9 @@ function VideoCallRoom({
             },
           }}
         >
-
           <CallEndIcon />
-
         </IconButton>
-
       </Box>
-
     </Box>
   );
 }
