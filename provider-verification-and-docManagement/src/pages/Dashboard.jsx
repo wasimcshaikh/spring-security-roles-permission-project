@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Alert,
@@ -304,20 +304,21 @@ function DashboardPage() {
 
     } catch (error) {
 
-      if (error.response) {
+  if (error.response) {
 
-        setError(
-          error.response.data
-        );
+    setError(
+      error.response.data?.message ||
+      "Unable to upload document"
+    );
 
-      } else {
+  } else {
 
-        setError(
-          "Unable to connect to server"
-        );
-      }
+    setError(
+      "Unable to connect to server"
+    );
+  }
 
-    } finally {
+} finally {
 
       setLoading(false);
     }
@@ -604,8 +605,9 @@ function DashboardPage() {
         background: "#123b4a",
 
         p: {
-          xs: 2,
-          sm: 4,
+          xs: 1.5,
+          sm: 2,
+          md: 4,
         },
       }}
     >
@@ -617,8 +619,8 @@ function DashboardPage() {
           mx: "auto",
 
           p: {
-            xs: 2,
-            sm: 3,
+            xs: 1.5,
+            sm: 2.5,
           },
 
           borderRadius: 4,
@@ -636,8 +638,9 @@ function DashboardPage() {
           elevation={0}
           sx={{
             p: {
-              xs: 2.5,
-              sm: 4,
+              xs: 1.5,
+              sm: 2.5,
+              md: 3,
             },
 
             borderRadius: 3,
@@ -647,21 +650,22 @@ function DashboardPage() {
           <Box
             sx={{
               display: "grid",
-
+              
+              // bgcolor : "green" ,
               gridTemplateColumns: {
                 xs: "1fr",
-                sm: "1.2fr 0.8fr",
+                md: "1fr",
               },
 
-              gap: 2,
+              gap: { xs: 1.5, md: 1 },
             }}
           >
 
             <Box
               sx={{
                 p: {
-                  xs: 2,
-                  sm: 3,
+                  xs: 1.5,
+                  sm: 2.5,
                 },
 
                 borderRadius: 2.5,
@@ -692,6 +696,11 @@ function DashboardPage() {
                   color: "#123b4a",
                   fontWeight: 800,
                   lineHeight: 1.15,
+                  fontSize: {
+                    xs: "1.5rem",
+                    sm: "1.8rem",
+                    md: "2.125rem",
+                  },
                 }}
               >
                 Welcome,{" "}
@@ -705,8 +714,8 @@ function DashboardPage() {
             <Box
               sx={{
                 p: {
-                  xs: 2,
-                  sm: 3,
+                  xs: 1.5,
+                  sm: 2.5,
                 },
 
                 borderRadius: 2.5,
@@ -778,8 +787,8 @@ function DashboardPage() {
             mt: 2,
 
             p: {
-              xs: 2.5,
-              sm: 3,
+              xs: 1.5,
+              sm: 2.5,
             },
 
             borderRadius: 3,
@@ -877,8 +886,8 @@ function DashboardPage() {
               mt: 2,
 
               p: {
-                xs: 2.5,
-                sm: 3,
+                xs: 1.5,
+                sm: 2.5,
               },
 
               borderRadius: 3,

@@ -22,7 +22,6 @@ function RolesAndPermissions() {
   const [permissions, setPermissions] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
-  const [roleFieldFocused, setRoleFieldFocused] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -160,17 +159,17 @@ function RolesAndPermissions() {
         p: { xs: 2, sm: 3, md: 4 },
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: "flex-start",
         flexDirection: "column",
-        height: "100%",
         width: "100%",
-        
+        boxSizing: "border-box",
       }}
     >
     <Box
       sx={{
-        width: "60%",
+        width: "100%",
         maxWidth: 800,
+        mx: "auto",
       }}
     >
       <Box 
@@ -222,7 +221,10 @@ function RolesAndPermissions() {
         sx={{
           p: { xs: 2, sm: 3, md: 4 },
           borderRadius: 3,
+          width: "100%",
           maxWidth: 700,
+          mx: "auto",
+          boxSizing: "border-box",
         }}
       >
         {/* Role Dropdown */}
@@ -235,23 +237,18 @@ function RolesAndPermissions() {
           Select Role
         </Typography>
 
-        <FormControl fullWidth>
+        <FormControl fullWidth variant="outlined">
           <InputLabel
-            sx={{
-              visibility: roleFieldFocused || selectedRole
-                ? "hidden"
-                : "visible",
-            }}
+            id="role-select-label"
           >
             Select Role
           </InputLabel>
 
           <Select
+            labelId="role-select-label"
             value={selectedRole}
-            label="Role"
+            label="Select Role"
             onChange={handleRoleChange}
-            onFocus={() => setRoleFieldFocused(true)}
-            onBlur={() => setRoleFieldFocused(false)}
           >
             {roles.map((role) => (
               <MenuItem
@@ -279,11 +276,29 @@ function RolesAndPermissions() {
           sx={{
             display: "flex",
             flexDirection: "column",
+            minWidth: 0,
           }}
         >
           {permissions.map((permission) => (
             <FormControlLabel
               key={permission.id}
+              sx={{
+                mx: 0,
+                width: "100%",
+                minWidth: 0,
+                alignItems: "flex-start",
+                "& .MuiCheckbox-root": {
+                  flexShrink: 0,
+                  mt: { xs: 0, sm: 0.25 },
+                },
+                "& .MuiFormControlLabel-label": {
+                  minWidth: 0,
+                  pt: 1,
+                  whiteSpace: "normal",
+                  overflowWrap: "anywhere",
+                  lineHeight: 1.4,
+                },
+              }}
               control={
                 <Checkbox
                   checked={selectedPermissions.includes(
@@ -305,9 +320,14 @@ function RolesAndPermissions() {
           text={saving ? "Updating..." : "Update Permissions"}
           onClick={handleSubmit}
           disabled={saving || !selectedRole}
+          fullWidth={false}
           sx={{
             mt: 3,
-            py: 1.4,
+            width: { xs: "100%", sm: "auto" },
+            minWidth: { sm: 200 },
+            px: { xs: 1.5, sm: 2.5 },
+            py: { xs: 1, sm: 1.1, md: 1.25 },
+            fontSize: { xs: "0.875rem", sm: "0.9rem" },
             borderRadius: 2,
             fontWeight: 700,
           }}

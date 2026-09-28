@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
+  Paper,
 } from "@mui/material";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -184,12 +185,96 @@ function ProviderDocuments() {
             <CircularProgress />
           </Box>
         ) : (
-          <CommonTable
-            columns={columns}
-            rows={documents}
-            actions={actions}
-            emptyMessage="No provider documents found"
-          />
+          <>
+            <Box sx={{ display: { xs: "none", lg: "block" } }}>
+              <CommonTable
+                columns={columns}
+                rows={documents}
+                actions={actions}
+                emptyMessage="No provider documents found"
+                rowKey="documentId"
+                compact
+              />
+            </Box>
+
+            <Box
+              sx={{
+                display: { xs: "grid", lg: "none" },
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(2, minmax(0, 1fr))",
+                },
+                gap: 1.25,
+              }}
+            >
+              {documents.length === 0 ? (
+                <Typography
+                  align="center"
+                  color="text.secondary"
+                  sx={{ py: 3 }}
+                >
+                  No provider documents found
+                </Typography>
+              ) : (
+                documents.map((document) => (
+                  <Paper
+                    key={document.documentId}
+                    elevation={0}
+                    sx={{
+                      p: 1.5,
+                      border: "1px solid rgba(24, 91, 117, 0.1)",
+                      borderRadius: 1,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        mb: 1.25,
+                        color: "#123b4a",
+                        fontWeight: 700,
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {document.fileName}
+                    </Typography>
+
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                        gap: 1,
+                        mb: 1.5,
+                      }}
+                    >
+                      {[
+                        ["Document ID", document.documentId],
+                        ["Provider ID", document.providerId],
+                        ["Provider Name", document.providerName],
+                        ["File Size", document.fileSize],
+                        ["Uploaded At", document.uploadedAt],
+                      ].map(([label, value]) => (
+                        <Box key={label} sx={{ minWidth: 0 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {label}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{ overflowWrap: "anywhere" }}
+                          >
+                            {value ?? "—"}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+
+                    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                      {actions(document)}
+                    </Box>
+                  </Paper>
+                ))
+              )}
+            </Box>
+          </>
         )}
       </Box>
 

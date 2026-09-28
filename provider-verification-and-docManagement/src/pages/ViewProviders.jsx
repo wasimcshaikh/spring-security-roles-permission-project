@@ -5,6 +5,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  Paper,
 } from "@mui/material";
 
 import CommonTable from "../components/CommonTable";
@@ -136,11 +137,90 @@ function ViewProviders() {
           <CircularProgress />
         </Box>
       ) : (
-        <CommonTable
-          columns={columns}
-          rows={providers}
-          emptyMessage="No providers found"
-        />
+        <>
+          <Box sx={{ display: { xs: "none", lg: "block" } }}>
+            <CommonTable
+              columns={columns}
+              rows={providers}
+              emptyMessage="No providers found"
+              rowKey="id"
+              compact
+            />
+          </Box>
+
+          <Box
+            sx={{
+              display: { xs: "grid", lg: "none" },
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "repeat(2, minmax(0, 1fr))",
+              },
+              gap: 1.25,
+            }}
+          >
+            {providers.length === 0 ? (
+              <Typography
+                align="center"
+                color="text.secondary"
+                sx={{ py: 3, gridColumn: "1 / -1" }}
+              >
+                No providers found
+              </Typography>
+            ) : (
+              providers.map((provider) => (
+                <Paper
+                  key={provider.id}
+                  elevation={0}
+                  sx={{
+                    p: 1.5,
+                    border: "1px solid rgba(24, 91, 117, 0.1)",
+                    borderRadius: 1,
+                    minWidth: 0,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      mb: 1.25,
+                      color: "#123b4a",
+                      fontWeight: 700,
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    {provider.fullName || "Provider"}
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                      gap: 1,
+                    }}
+                  >
+                    {[
+                      ["ID", provider.id],
+                      ["Email", provider.email],
+                      ["Phone Number", provider.phoneNumber],
+                      ["Role", provider.role],
+                    ].map(([label, value]) => (
+                      <Box key={label} sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          {label}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ overflowWrap: "anywhere" }}
+                        >
+                          {value ?? "—"}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Paper>
+              ))
+            )}
+          </Box>
+        </>
       )}
     </Box>
   );

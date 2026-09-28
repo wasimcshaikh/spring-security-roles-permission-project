@@ -1,5 +1,3 @@
-import React from "react";
-
 import {
   Paper,
   Table,
@@ -17,6 +15,7 @@ function CommonTable({
   actions,
   emptyMessage = "No records found",
   rowKey = "id",
+  compact = false,
 }) {
   return (
     <TableContainer
@@ -25,7 +24,17 @@ function CommonTable({
       sx={{
         borderRadius: 3,
         border: "1px solid rgba(24, 91, 117, 0.1)",
-        overflow: "hidden",
+        overflowX: "auto",
+        overflowY: "hidden",
+        ...(compact && {
+          "@media (min-width:600px) and (max-width:899.95px)": {
+            "& .MuiTableCell-root": {
+              px: 1,
+              py: 0.75,
+              fontSize: "0.8rem",
+            },
+          },
+        }),
       }}
     >
       <Table>
