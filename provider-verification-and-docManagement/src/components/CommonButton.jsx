@@ -12,6 +12,8 @@ function CommonButton({
   onClick,
   startIcon,
   endIcon,
+  component,
+  children,
   sx = {},
 }) {
   return (
@@ -25,6 +27,7 @@ function CommonButton({
       onClick={onClick}
       startIcon={startIcon}
       endIcon={endIcon}
+      component={component}
       sx={{
         borderRadius: 2,
         textTransform: "none",
@@ -36,7 +39,7 @@ function CommonButton({
         ...sx,
       }}
     >
-      {text}
+      {children || text}
     </Button>
   );
 }

@@ -282,7 +282,8 @@ public class SecurityConfig {
                         .hasAuthority(
                                 "EXPORT_PROVIDERS"
                         )
-
+                        .requestMatchers("/api/admin/users/import")
+                        .hasAuthority("IMPORT_USERS")
 
                         .requestMatchers(
                                 "/api/admin/roles/**",
@@ -290,6 +291,21 @@ public class SecurityConfig {
                         )
                         .hasAuthority("MANAGE_PERMISSIONS")
 
+                        .requestMatchers(
+                                "/api/admin/assessments/**"
+                        )
+                        .hasAuthority("VIEW_ASSESSMENTS")
+
+                        .requestMatchers(
+                                "/api/admin/customers/**"
+                        )
+                        .hasAuthority("VIEW_CUSTOMER")
+
+
+                        .requestMatchers(
+                                "/api/admin/customers/assessments/**"
+                        )
+                        .hasAuthority("VIEW_ASSESSMENTS")
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/video/session"

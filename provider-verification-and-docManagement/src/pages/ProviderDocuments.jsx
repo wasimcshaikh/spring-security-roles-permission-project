@@ -284,7 +284,11 @@ function ProviderDocuments() {
         open={openPdfDialog}
         onClose={handleClosePdfDialog}
         fullWidth
-        maxWidth="lg"
+        maxWidth="lg"  
+        sx={{
+          // padding : 2
+          height : "65%"
+        }}
       >
         <DialogTitle
           sx={{

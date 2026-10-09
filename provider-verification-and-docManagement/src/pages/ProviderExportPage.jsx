@@ -247,11 +247,15 @@ function ProviderExportPage() {
         <Box
           sx={{
             display: "grid",
-
             gridTemplateColumns: {
               xs: "1fr",
               sm: "1fr 1fr",
             },
+            
+
+            width: {
+              xs : "70%" ,
+            } ,
 
             gap: 2,
           }}

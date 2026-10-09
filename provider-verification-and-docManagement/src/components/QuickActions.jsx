@@ -6,6 +6,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  useMediaQuery,
 } from "@mui/material";
 
 import ReactFusionCharts from "react-fusioncharts";
@@ -27,6 +28,7 @@ ReactFC.fcRoot(
 );
 
 const QuickActions = () => {
+  const isSmallDevice = useMediaQuery("(max-width:899.95px)");
   const [roleCounts, setRoleCounts] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -36,6 +38,8 @@ const QuickActions = () => {
   );
 
   const isAdmin = provider?.role === "ADMIN";
+
+   
 
   useEffect(() => {
     if (!isAdmin) {
@@ -72,7 +76,11 @@ const QuickActions = () => {
 
   // Don't render anything for non-admin users
   if (!isAdmin) {
-    return null;
+    return (
+      <Box>
+        Welcome
+      </Box>
+    );
   }
 
   // Loading state
@@ -130,11 +138,12 @@ const QuickActions = () => {
   );
 
   const dataSource = {
+    
     chart: {
       caption: "Users by Role",
       subCaption: "MediSlot user distribution",
 
-      showValues: "1",
+      showValues: "0",
       showPercentValues: "1",
       showLegend: "1",
 
@@ -142,8 +151,13 @@ const QuickActions = () => {
       use3DLighting: "0",
 
       theme: "fusion",
+     
+
+      // chartTopMargin: isSmallDevice ? "0" : "20",
+      // captionPadding: isSmallDevice ? "0" : "10",
     },
 
+    
     data: chartData,
   };
 
@@ -151,7 +165,10 @@ const QuickActions = () => {
     <Box
       sx={{
         width: "100%",
-        p: 2,
+        // height: "80%",
+
+        
+        p: { xs: 0.5, sm: 1 },
       }}
     >
       <Paper
@@ -161,8 +178,8 @@ const QuickActions = () => {
           borderRadius: 3,
 
           p: {
-            xs: 2,
-            sm: 3,
+            xs: 1,
+            sm: 2,
             md: 4,
           },
         }}
@@ -171,7 +188,12 @@ const QuickActions = () => {
           variant="h6"
           sx={{
             fontWeight: 700,
-            mb: 2,
+            display: {
+              sm : "none" , 
+              xs : "none" ,
+              lg : "block" ,
+            }
+            // mb: 2,
           }}
         >
           Users by Role
@@ -180,7 +202,7 @@ const QuickActions = () => {
         <ReactFC
           type="pie3d"
           width="100%"
-          height="400"
+          height={isSmallDevice ? "520" : "550"}
           dataFormat="JSON"
           dataSource={dataSource}
         />

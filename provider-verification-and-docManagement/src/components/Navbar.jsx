@@ -18,11 +18,10 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
-import VideoCallIcon from "@mui/icons-material/VideoCall";
 
 import CommonButton from "./CommonButton";
 
-import { getCurrentUser, logout } from "../utils/auth";
+import { logout } from "../utils/auth";
 import { canAccessNavigationItem } from "../utils/permissions";
 import { navigationItems } from "../config/navigation";
 
@@ -43,9 +42,8 @@ function Navbar() {
   const navigate = useNavigate();
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
-
-  const user = getCurrentUser();
-  const role = user?.role;
+  const [openDesktopSubmenu, setOpenDesktopSubmenu] = useState(null);
+  const [openDrawerSubmenu, setOpenDrawerSubmenu] = useState(null);
 
   const visibleNavigationItems = navigationItems
     .filter(canAccessNavigationItem)
@@ -53,11 +51,14 @@ function Navbar() {
 
   const handleNavigation = (path) => {
     setOpenMobileMenu(false);
+    setOpenDesktopSubmenu(null);
+    setOpenDrawerSubmenu(null);
     navigate(path);
   };
 
   const handleLogoutClick = () => {
     setOpenMobileMenu(false);
+    setOpenDesktopSubmenu(null);
     setOpenLogoutDialog(true);
   };
 
@@ -77,17 +78,23 @@ function Navbar() {
       key: item.path,
       label: item.label,
       icon: item.icon,
+      children: item.children,
       isNavigation: true,
-      onClick: () => handleNavigation(item.path),
+      hasSubmenu: Boolean(item.children) || item.path === "/flex-practice",
+      submenuItems: item.children || (
+        item.path === "/flex-practice"
+          ? [
+              { label: "Flex Practice", path: "/flex-practice" },
+              { label: "Grid Practice", path: "/grid-practice" },
+            ]
+          : null
+      ),
+      onClick: item.children || item.path === "/flex-practice"
+        ? () => setOpenDesktopSubmenu((open) => open === item.path ? null : item.path)
+        : () => handleNavigation(item.path),
       variant: "text",
     })),
-    {
-      key: "join-video-call",
-      label: "Join Video Call",
-      icon: <VideoCallIcon />,
-      onClick: () => handleNavigation("/video-calls"),
-      variant: "text",
-    },
+    
     {
       key: "logout",
       label:  "Signout",
@@ -108,69 +115,176 @@ function Navbar() {
         display: "inline-flex",
       },
       whiteSpace: "nowrap",
-      flexShrink: 0,
+      flexShrink: item.isLogout ? 0 : 1,
+      minWidth: item.isLogout ? "max-content" : 0,
       color: "#ffffff",
       px: 1,
       boxShadow: "none",
       "&:hover": {
         backgroundColor: "rgba(255,255,255,0.1)",
       },
+      // position : "fixed"
     };
   };
 
-  const renderBarItem = (item) => (
-    <CommonButton
-      key={item.key}
-      text={item.label}
-      variant={item.variant}
-      color="inherit"
-      fullWidth={false}
-      size="medium"
-      startIcon={item.icon}
-      onClick={item.onClick}
-      sx={{
-        ...barButtonSx(item),
-        ...(item.isLogout && {
-          borderColor: "rgba(255,255,255,0.5)",
-          "&:hover": {
-            borderColor: "#ffffff",
-            backgroundColor: "rgba(255,255,255,0.1)",
-          },
-        }),
-      }}
-    />
-  );
+  const renderBarItem = (item) => {
+    const button = (
+      <CommonButton
+        key={item.key}
+        text={item.label}
+        variant={item.variant}
+        color="inherit"
+        fullWidth={false}
+        size="medium"
+        startIcon={item.icon}
+        onClick={item.onClick}
+        sx={{
+          ...barButtonSx(item),
+          ...(item.isLogout && {
+            borderColor: "rgba(255,255,255,0.5)",
+            "&:hover": {
+              borderColor: "#ffffff",
+              backgroundColor: "rgba(255,255,255,0.1)",
+            },
+          }),
+        }}
+      />
+    );
 
-  const renderDrawerItem = (item) => (
-    <CommonButton
-      key={item.key}
-      text={item.label}
-      variant={item.variant}
-      color="inherit"
-      fullWidth
-      size="medium"
-      startIcon={item.icon}
-      onClick={item.onClick}
-      sx={{
-        justifyContent: "flex-start",
-        whiteSpace: "nowrap",
-        color: "#0f172a",
-        px: 2,
-        boxShadow: "none",
-        ...(item.isLogout && {
-          borderColor: "rgba(15,23,42,0.35)",
-        }),
-        "&:hover": {
-          backgroundColor: "rgba(15,23,42,0.08)",
-        },
-      }}
-    />
-  );
+    if (!item.hasSubmenu) {
+      return button;
+    }
+
+    const submenuItems = item.submenuItems.filter(canAccessNavigationItem);
+
+    return (
+      <Box
+        key={item.key}
+        sx={{ position: "relative", display: "inline-flex" }}
+        onMouseEnter={() => setOpenDesktopSubmenu(item.key)}
+        onMouseLeave={() => setOpenDesktopSubmenu(null)}
+      >
+        {button}
+        {openDesktopSubmenu === item.key && (
+          <Box
+            role="menu"
+            sx={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              width: 190,
+              p: 1,
+              bgcolor: "#ffffff",
+              borderRadius: 1,
+              boxShadow: 3,
+              zIndex: (theme) => theme.zIndex.appBar + 1,
+            }}
+          >
+            {submenuItems.map((submenuItem) => (
+              <CommonButton
+                key={submenuItem.path}
+                text={submenuItem.label}
+                variant="text"
+                color="inherit"
+                fullWidth
+                size="medium"
+                startIcon={submenuItem.icon}
+                onClick={() => handleNavigation(submenuItem.path)}
+                sx={{
+                  justifyContent: "flex-start",
+                  color: "#0f172a",
+                  px: 1.5,
+                  boxShadow: "none",
+                }}
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
+  const renderDrawerItem = (item) => {
+    if (item.hasSubmenu) {
+      const submenuItems = item.submenuItems.filter(canAccessNavigationItem);
+
+      return (
+        <Box key={item.key}>
+          <CommonButton
+            text={item.label}
+            variant={item.variant}
+            color="inherit"
+            fullWidth
+            size="medium"
+            startIcon={item.icon}
+            onClick={() => setOpenDrawerSubmenu((open) => open === item.key ? null : item.key)}
+            sx={{
+              justifyContent: "flex-start",
+              whiteSpace: "nowrap",
+              color: "#0f172a",
+              px: 2,
+              boxShadow: "none",
+              "&:hover": { backgroundColor: "rgba(15,23,42,0.08)" },
+            }}
+          />
+          {openDrawerSubmenu === item.key && (
+            <Box sx={{ pl: 3, display: "flex", flexDirection: "column" }}>
+              {submenuItems.map((submenuItem) => (
+                <CommonButton
+                  key={submenuItem.path}
+                  text={submenuItem.label}
+                  variant="text"
+                  color="inherit"
+                  fullWidth
+                  size="medium"
+                  startIcon={submenuItem.icon}
+                  onClick={() => handleNavigation(submenuItem.path)}
+                  sx={{
+                    justifyContent: "flex-start",
+                    color: "#0f172a",
+                    px: 2,
+                    boxShadow: "none",
+                    "&:hover": { backgroundColor: "rgba(15,23,42,0.08)" },
+                  }}
+                />
+              ))}
+            </Box>
+          )}
+        </Box>
+      );
+    }
+
+    return (
+      <CommonButton
+        key={item.key}
+        text={item.label}
+        variant={item.variant}
+        color="inherit"
+        fullWidth
+        size="medium"
+        startIcon={item.icon}
+        onClick={item.onClick}
+        sx={{
+          justifyContent: "flex-start",
+          whiteSpace: "nowrap",
+          color: "#0f172a",
+          px: 2,
+          boxShadow: "none",
+          ...(item.isLogout && {
+            borderColor: "rgba(15,23,42,0.35)",
+          }),
+          "&:hover": {
+            backgroundColor: "rgba(15,23,42,0.08)",
+          },
+        }}
+      />
+    );
+  };
 
   return (
     <>
       <AppBar
-        position="static"
+        position="fixed"
         
         elevation={0}
         sx={{
@@ -188,7 +302,11 @@ function Navbar() {
             px: { xs: 2, sm: 3, md: 3, lg: 1 },
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: {
+              xs: "space-between",
+              sm: "space-between",
+              lg: "space-between",
+            },
             gap: { xs: 1, sm: 2 },
             
             
@@ -230,40 +348,61 @@ function Navbar() {
             </Typography>
           </Box>
 
-          {/* Navigation links collapse before the call and signout actions. */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: "row",
               alignItems: "center",
-              flexWrap: "nowrap",
-              gap: 0.5,
-              overflow: "hidden",
-              marginLeft: "auto",
+              gap: { xs: 0.5, sm: 1 },
+              ml: "auto",
+              minWidth: 0,
             }}
           >
-            {priorityItems.map((item) => renderBarItem(item))}
-          </Box>
+            {/* Navigation links collapse before the call and signout actions. */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                flexWrap: "nowrap",
+                gap: 0.5,
+                overflow: "visible",
+                flex: "1 1 auto",
+                minWidth: 0,
+                justifyContent: "flex-end",
+              }}
+            >
+              {priorityItems
+                .filter((item) => !item.isLogout)
+                .map((item) => renderBarItem(item))}
+            </Box>
 
-          <IconButton
-            aria-label="Open navigation menu"
-            onClick={() => setOpenMobileMenu(true)}
-            sx={{
-              display: "inline-flex",
-              [`@media (min-width:${FULL_NAV_MIN_WIDTH}px)`]: {
-                display: "none",
-              },
-              color: "#ffffff",
-              border: "1px solid rgba(255,255,255,0.45)",
-              borderRadius: 2,
-              flexShrink: 0,
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+            {renderBarItem(priorityItems.find((item) => item.isLogout))}
+
+            <IconButton
+              aria-label="Open navigation menu"
+              onClick={() => setOpenMobileMenu(true)}
+              sx={{
+                display: "inline-flex",
+                [`@media (min-width:${FULL_NAV_MIN_WIDTH}px)`]: {
+                  display: "none",
+                },
+                color: "#ffffff",
+                border: "1px solid rgba(255,255,255,0.45)",
+                borderRadius: 2,
+                flexShrink: 0,
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
         </Toolbar>
        
       </AppBar>
+
+      <Toolbar
+        aria-hidden="true"
+        sx={{ minHeight: { xs: 60, sm: 72 } }}
+      />
 
       <Drawer
         anchor="right"

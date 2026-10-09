@@ -68,3 +68,30 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/changes/023-create-video-call.yaml
+
+  - include:
+      file: db/changelog/changes/024-add-import-users-permission.yaml
+
+  - include:
+          file: db/changelog/changes/025-add-import-users-to-admin.yaml
+
+  - include:
+      file: db/changelog/changes/026-create-assessment.yaml
+
+  - include:
+      file: db/changelog/changes/027-add-view-assessments-permission.yaml
+
+  - include:
+      file: db/changelog/changes/028-add-view-assessments-to-admin.yaml
+
+  - include:
+      file: db/changelog/changes/029-create-customer.yaml
+
+  - include:
+      file: db/changelog/changes/030-add-view-customer-permission.yaml
+
+  - include:
+      file: db/changelog/changes/031-add-view-customer-to-admin.yaml
+
+  - include:
+      file: db/changelog/changes/032-create-treatment-plan-assessment.yaml

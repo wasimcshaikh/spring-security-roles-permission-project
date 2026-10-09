@@ -1,0 +1,20 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 027-add-view-assessments-permission
+      author: medislot
+
+      changes:
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: VIEW_ASSESSMENTS
+
+      rollback:
+
+        - delete:
+            tableName: permission
+            where: name = 'VIEW_ASSESSMENTS'

@@ -1,0 +1,20 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 030-add-view-customer-permission
+      author: medislot
+
+      changes:
+
+        - insert:
+            tableName: permission
+            columns:
+              - column:
+                  name: name
+                  value: VIEW_CUSTOMER
+
+      rollback:
+
+        - delete:
+            tableName: permission
+            where: name = 'VIEW_CUSTOMER'

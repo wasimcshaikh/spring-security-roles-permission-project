@@ -13,6 +13,12 @@ import ViewProviders from "./pages/ViewProviders";
 import ProviderDocuments from "./pages/ProviderDocuments";
 import RolesAndPermissions from "./pages/RolesAndPermissions";
 import VideoCalls from "./pages/VideoCalls";
+import UploadUsers from "./pages/UploadUsers";
+import FlexPractice from "./pages/FlexPractice";
+import GridPractice from "./pages/GridPractice";
+import Assessment from "./pages/Assessment";
+import Customer from "./pages/Customer";
+import Compliance from "./pages/Compliance";
 
 function App() {
   return (
@@ -28,6 +34,12 @@ function App() {
         <Route path="/roles-permissions" element={<RolesAndPermissions />} />
         <Route path="/video-calls" element={<VideoCalls />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/flex-practice" element={<FlexPractice />} />
+        <Route path="/grid-practice" element={<GridPractice />} />
+        <Route path="/assessments" element={<Assessment />} />
+        <Route path="/customers" element={<Customer />} />
+        <Route path="/compliance" element={<Compliance />} />
+        <Route path="/upload-users" element={<UploadUsers />} />
         {/* Admin */}{" "}
         <Route
           path="/provider-export"
