@@ -18,6 +18,7 @@ import FlexPractice from "./pages/FlexPractice";
 import GridPractice from "./pages/GridPractice";
 import Assessment from "./pages/Assessment";
 import Customer from "./pages/Customer";
+import CustomerProfile from "./pages/CustomerProfile";
 import Compliance from "./pages/Compliance";
 
 function App() {
@@ -38,6 +39,10 @@ function App() {
         <Route path="/grid-practice" element={<GridPractice />} />
         <Route path="/assessments" element={<Assessment />} />
         <Route path="/customers" element={<Customer />} />
+        <Route
+          path="/customer-profile/:customerId"
+          element={<CustomerProfile />}
+        />
         <Route path="/compliance" element={<Compliance />} />
         <Route path="/upload-users" element={<UploadUsers />} />
         {/* Admin */}{" "}

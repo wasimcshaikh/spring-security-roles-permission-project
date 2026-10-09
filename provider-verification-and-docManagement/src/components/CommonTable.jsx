@@ -109,7 +109,9 @@ function CommonTable({
                   <TableCell
                     key={column.field}
                   >
-                    {row[column.field]}
+                    {column.renderCell
+                      ? column.renderCell(row)
+                      : row[column.field]}
                   </TableCell>
 
                 ))}
