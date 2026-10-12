@@ -17,6 +17,8 @@ import {
   MenuItem,
   Paper,
   Select,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -31,6 +33,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import CommonButton from "../components/CommonButton";
 import CommonTable from "../components/CommonTable";
+import CustomerCompliance from "../components/CustomerCompliance";
 import axiosInstance from "../utils/axiosInstance";
 
 const frequencyUnits = ["DAY", "WEEK", "MONTH"];
@@ -101,6 +104,16 @@ function CustomerProfile() {
   const [error, setError] = useState("");
   const [assessmentOptionsError, setAssessmentOptionsError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [completeAssessmentDialogOpen, setCompleteAssessmentDialogOpen] =
+    useState(false);
+  const [pendingAssignments, setPendingAssignments] = useState([]);
+  const [loadingPendingAssignments, setLoadingPendingAssignments] =
+    useState(false);
+  const [pendingAssignmentsError, setPendingAssignmentsError] = useState("");
+  const [selectedPendingAssessmentId, setSelectedPendingAssessmentId] =
+    useState("");
+  const [completingAssessment, setCompletingAssessment] = useState(false);
+  const [completeAssessmentError, setCompleteAssessmentError] = useState("");
   const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
   const [actionMenuAnchor, setActionMenuAnchor] = useState(null);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
@@ -111,6 +124,7 @@ function CustomerProfile() {
   const [saving, setSaving] = useState(false);
   const [savingCompletion, setSavingCompletion] = useState(false);
   const [success, setSuccess] = useState("");
+  const [selectedProfileTab, setSelectedProfileTab] = useState(0);
 
   const availableAssessments = useMemo(
     () =>
@@ -218,6 +232,95 @@ function CustomerProfile() {
     setAssignmentForm(emptyAssignment);
     setFormError("");
     setDialogOpen(true);
+  };
+
+  const openCompleteAssessmentDialog = async () => {
+    setPendingAssignments([]);
+    setSelectedPendingAssessmentId("");
+    setPendingAssignmentsError("");
+    setCompleteAssessmentError("");
+    setCompleteAssessmentDialogOpen(true);
+    setLoadingPendingAssignments(true);
+
+    try {
+      const response = await axiosInstance.get(
+        `/api/admin/customers/assessments/${customerId}/pending-assessments`
+      );
+      if (!Array.isArray(response.data)) {
+        throw new Error("The pending assessments response was not a list.");
+      }
+
+      setPendingAssignments(response.data);
+    } catch (fetchError) {
+      console.error("Failed to fetch pending assessments:", fetchError);
+      setPendingAssignmentsError(
+        getApiErrorMessage(fetchError, "Unable to load pending assessments.")
+      );
+    } finally {
+      setLoadingPendingAssignments(false);
+    }
+  };
+
+  const closeCompleteAssessmentDialog = () => {
+    if (!completingAssessment) {
+      setCompleteAssessmentDialogOpen(false);
+      setCompleteAssessmentError("");
+    }
+  };
+
+  const handleCompleteAssessment = async (event) => {
+    event.preventDefault();
+    setCompleteAssessmentError("");
+
+    const selectedAssignment = pendingAssignments.find(
+      (assignment) =>
+        String(assignment.assessmentId) ===
+        String(selectedPendingAssessmentId)
+    );
+
+    if (!selectedAssignment) {
+      setCompleteAssessmentError("Select an assessment to complete.");
+      return;
+    }
+
+    try {
+      setCompletingAssessment(true);
+      const response = await axiosInstance.patch(
+        `/api/admin/customers/assessments/${customerId}/${selectedAssignment.assessmentId}/complete`
+      );
+
+      if (
+        !response.data ||
+        String(response.data.assessmentId) !==
+          String(selectedAssignment.assessmentId)
+      ) {
+        throw new Error("The completed assessment response was invalid.");
+      }
+
+      setAssignments((current) =>
+        current.map((assignment) =>
+          String(assignment.id) === String(response.data.id)
+            ? response.data
+            : assignment
+        )
+      );
+      setPendingAssignments((current) =>
+        current.filter(
+          (assignment) =>
+            String(assignment.assessmentId) !==
+            String(response.data.assessmentId)
+        )
+      );
+      setSuccess(`${response.data.assessmentName} completed successfully.`);
+      setCompleteAssessmentDialogOpen(false);
+    } catch (submitError) {
+      console.error("Failed to complete assessment:", submitError);
+      setCompleteAssessmentError(
+        getApiErrorMessage(submitError, "Unable to complete this assessment.")
+      );
+    } finally {
+      setCompletingAssessment(false);
+    }
   };
 
   const closeAssignDialog = () => {
@@ -553,6 +656,19 @@ function CustomerProfile() {
               p: { xs: 1.5, sm: 2.5 },
             }}
           >
+            <Tabs
+              value={selectedProfileTab}
+              onChange={(_, newValue) => setSelectedProfileTab(newValue)}
+              aria-label="Customer profile sections"
+              variant="scrollable"
+              allowScrollButtonsMobile
+              sx={{ mb: 2, borderBottom: 1, borderColor: "divider" }}
+            >
+              <Tab label="Treatment Plan" />
+              <Tab label="Assessment" />
+              <Tab label="Compliance" />
+            </Tabs>
+
             <Box
               sx={{
                 display: "flex",
@@ -564,43 +680,70 @@ function CustomerProfile() {
               }}
             >
               <Box>
-                <Typography variant="h6" fontWeight={700}>
-                  Assigned Assessments
+                <Typography variant="h4" fontWeight={800}>
+                  {selectedProfileTab === 0
+                    ? "Treatment Plan"
+                    : selectedProfileTab === 1
+                      ? "Assessment"
+                      : "Compliance Summary"}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Assessments assigned to {customer.fullName}.
+                  {selectedProfileTab === 0
+                    ? `Assessments assigned to ${customer.fullName} under the treatment plan.`
+                    : selectedProfileTab === 1
+                      ? `Assessments assigned to ${customer.fullName}.`
+                      : `Completion progress across ${customer.fullName}'s assigned assessments.`}
                 </Typography>
               </Box>
-              <CommonButton
-                text="Assign Assessment"
-                variant="contained"
-                fullWidth={false}
-                size="medium"
-                startIcon={<AddIcon />}
-                onClick={openAssignDialog}
-                disabled={
-                  loadingAssessments ||
-                  Boolean(assessmentOptionsError) ||
-                  availableAssessments.length === 0
-                }
-                sx={{ whiteSpace: "nowrap" }}
-              />
+              {selectedProfileTab !== 2 && (
+                <CommonButton
+                  text={
+                    selectedProfileTab === 0
+                      ? "Assign Assessment"
+                      : "Complete Assessment"
+                  }
+                  variant="contained"
+                  fullWidth={false}
+                  size="medium"
+                  startIcon={<AddIcon />}
+                  onClick={
+                    selectedProfileTab === 0
+                      ? openAssignDialog
+                      : openCompleteAssessmentDialog
+                  }
+                  disabled={
+                    selectedProfileTab === 0
+                      ? loadingAssessments
+                      : completingAssessment
+                  }
+                  sx={{ whiteSpace: "nowrap" }}
+                />
+              )}
             </Box>
 
-            {assessmentOptionsError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {assessmentOptionsError}
-              </Alert>
-            )}
+            {selectedProfileTab === 2 ? (
+              <CustomerCompliance
+                assignments={assignments}
+                customerName={customer.fullName}
+              />
+            ) : (
+              <>
+                {assessmentOptionsError && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    {assessmentOptionsError}
+                  </Alert>
+                )}
 
-            <CommonTable
-              columns={assignmentColumns}
-              rows={assignmentRows}
-              actions={renderRowActions}
-              rowKey="id"
-              emptyMessage="No assessments are assigned to this customer."
-              compact
-            />
+                <CommonTable
+                  columns={assignmentColumns}
+                  rows={assignmentRows}
+                  actions={renderRowActions}
+                  rowKey="id"
+                  emptyMessage="No assessments are assigned to this customer."
+                  compact
+                />
+              </>
+            )}
           </Paper>
         </>
       )}
@@ -822,6 +965,96 @@ function CustomerProfile() {
                 loadingAssessments ||
                 Boolean(assessmentOptionsError) ||
                 availableAssessments.length === 0
+              }
+            />
+          </DialogActions>
+        </Box>
+      </Dialog>
+
+      <Dialog
+        open={completeAssessmentDialogOpen}
+        onClose={closeCompleteAssessmentDialog}
+        fullWidth
+        maxWidth="xs"
+      >
+        <Box component="form" onSubmit={handleCompleteAssessment}>
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            Complete Assessment
+            <IconButton
+              aria-label="Close dialog"
+              onClick={closeCompleteAssessmentDialog}
+              disabled={completingAssessment}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ display: "grid", gap: 2, pt: "8px !important" }}>
+            {completeAssessmentError && (
+              <Alert severity="error">{completeAssessmentError}</Alert>
+            )}
+            {pendingAssignmentsError && (
+              <Alert severity="error">{pendingAssignmentsError}</Alert>
+            )}
+            {loadingPendingAssignments ? (
+              <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                <CircularProgress />
+              </Box>
+            ) : pendingAssignmentsError ? null : pendingAssignments.length ===
+              0 ? (
+              <Alert severity="info">
+                There are no pending assessments to complete.
+              </Alert>
+            ) : (
+              <FormControl fullWidth required>
+                <InputLabel id="pending-assessment-select">
+                  Assessment
+                </InputLabel>
+                <Select
+                  labelId="pending-assessment-select"
+                  label="Assessment"
+                  value={selectedPendingAssessmentId}
+                  onChange={(event) =>
+                    setSelectedPendingAssessmentId(event.target.value)
+                  }
+                  disabled={completingAssessment}
+                >
+                  {pendingAssignments.map((assignment) => (
+                    <MenuItem
+                      key={assignment.id}
+                      value={String(assignment.assessmentId)}
+                    >
+                      {assignment.assessmentName}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <CommonButton
+              text="Cancel"
+              variant="outlined"
+              fullWidth={false}
+              size="medium"
+              onClick={closeCompleteAssessmentDialog}
+              disabled={completingAssessment}
+            />
+            <CommonButton
+              text={completingAssessment ? "Completing..." : "Submit"}
+              type="submit"
+              fullWidth={false}
+              size="medium"
+              disabled={
+                completingAssessment ||
+                loadingPendingAssignments ||
+                Boolean(pendingAssignmentsError) ||
+                pendingAssignments.length === 0
               }
             />
           </DialogActions>

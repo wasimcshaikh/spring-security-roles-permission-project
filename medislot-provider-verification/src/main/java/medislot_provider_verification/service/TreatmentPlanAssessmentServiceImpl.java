@@ -1,4 +1,5 @@
-package medislot_provider_verification.service;
+
+        package medislot_provider_verification.service;
 
 import medislot_provider_verification.dto.AssessmentCompletionRequest;
 import medislot_provider_verification.dto.TreatmentPlanAssessmentRequest;
@@ -48,14 +49,12 @@ public class TreatmentPlanAssessmentServiceImpl
             Long customerId,
             TreatmentPlanAssessmentRequest request) {
 
-        // 1. Find an active customer
         Customer customer = customerRepository
                 .findByIdAndActiveTrue(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(
                         "Customer not found with id: " + customerId
                 ));
 
-        // 2. Find an active assessment
         Assessment assessment = assessmentRepository
                 .findByIdAndActiveTrue(request.getAssessmentId())
                 .orElseThrow(() -> new AssessmentNotFoundException(
@@ -63,7 +62,6 @@ public class TreatmentPlanAssessmentServiceImpl
                                 + request.getAssessmentId()
                 ));
 
-        // 3. Prevent duplicate active assignments
         boolean alreadyAssigned =
                 treatmentPlanAssessmentRepository
                         .existsByCustomer_IdAndAssessment_IdAndActiveTrue(
@@ -77,7 +75,6 @@ public class TreatmentPlanAssessmentServiceImpl
             );
         }
 
-        // 4. Initialize timestamps and completion counts
         LocalDateTime now = LocalDateTime.now();
 
         TreatmentPlanAssessment assignment =
@@ -93,17 +90,13 @@ public class TreatmentPlanAssessmentServiceImpl
                         .updatedAt(now)
                         .build();
 
-        // 5. Save the assignment
         TreatmentPlanAssessment savedAssignment =
                 treatmentPlanAssessmentRepository.save(assignment);
 
-        // 6. Update the customer flag
         customer.setIsAssessmentAssigned(true);
         customer.setUpdatedAt(now);
-
         customerRepository.save(customer);
 
-        // 7. Return assignment details
         return mapToResponse(savedAssignment);
     }
 
@@ -112,17 +105,83 @@ public class TreatmentPlanAssessmentServiceImpl
     public List<TreatmentPlanAssessmentResponse> getCustomerAssessments(
             Long customerId) {
 
-        // Confirm that the customer exists and is active
         customerRepository
                 .findByIdAndActiveTrue(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException(
                         "Customer not found with id: " + customerId
                 ));
 
-        // Fetch active assignments for this customer
         return treatmentPlanAssessmentRepository
                 .findByCustomer_IdAndActiveTrueOrderByIdAsc(customerId)
                 .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public TreatmentPlanAssessmentResponse markAssessmentCompleted(
+            Long customerId,
+            Long treatmentPlanAssessmentId,
+            AssessmentCompletionRequest request) {
+
+        customerRepository.findByIdAndActiveTrue(customerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Active customer not found with id: " + customerId
+                ));
+
+        TreatmentPlanAssessment assignment =
+                treatmentPlanAssessmentRepository
+                        .findByIdAndCustomer_IdAndActiveTrue(
+                                treatmentPlanAssessmentId,
+                                customerId
+                        )
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Active assessment assignment not found for customer"
+                        ));
+
+        Integer completedCount = request.getCompletedCount();
+
+        if (completedCount > assignment.getFrequency()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Completed count cannot exceed the assigned frequency of "
+                            + assignment.getFrequency()
+            );
+        }
+
+        assignment.setCompletedCount(completedCount);
+        assignment.setRemainingCount(
+                assignment.getFrequency() - completedCount
+        );
+        assignment.setUpdatedAt(LocalDateTime.now());
+
+        TreatmentPlanAssessment updatedAssignment =
+                treatmentPlanAssessmentRepository.save(assignment);
+
+        return mapToResponse(updatedAssignment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TreatmentPlanAssessmentResponse> getPendingAssessments(
+            Long customerId) {
+
+        customerRepository.findByIdAndActiveTrue(customerId)
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "Customer not found with id: " + customerId
+                ));
+
+        List<TreatmentPlanAssessment> pendingAssignments =
+                treatmentPlanAssessmentRepository
+                        .findByCustomer_IdAndActiveTrueAndRemainingCountGreaterThanOrderByIdAsc(
+                                customerId,
+                                0
+                        );
+
+        return pendingAssignments.stream()
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -146,56 +205,53 @@ public class TreatmentPlanAssessmentServiceImpl
         );
     }
 
-
     @Override
     @Transactional
-    public TreatmentPlanAssessmentResponse markAssessmentCompleted(
+    public TreatmentPlanAssessmentResponse completeAssessment(
             Long customerId,
-            Long treatmentPlanAssessmentId,
-            AssessmentCompletionRequest request) {
+            Long assessmentId) {
 
         // Verify that the customer exists and is active
         customerRepository.findByIdAndActiveTrue(customerId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Active customer not found with id: " + customerId
+                .orElseThrow(() -> new CustomerNotFoundException(
+                        "Customer not found with id: " + customerId
                 ));
 
-        // Find the active assignment belonging to this customer
+        // Find the active assignment using customer ID and assessment ID
         TreatmentPlanAssessment assignment =
                 treatmentPlanAssessmentRepository
-                        .findByIdAndCustomer_IdAndActiveTrue(
-                                treatmentPlanAssessmentId,
-                                customerId
+                        .findByCustomer_IdAndAssessment_IdAndActiveTrue(
+                                customerId,
+                                assessmentId
                         )
                         .orElseThrow(() -> new ResponseStatusException(
                                 HttpStatus.NOT_FOUND,
-                                "Active assessment assignment not found for customer"
+                                "Assessment is not assigned to this customer"
                         ));
 
-        Integer completedCount = request.getCompletedCount();
-
-        // Validate completed count against assigned frequency
-        if (completedCount > assignment.getFrequency()) {
+        // Ensure there are remaining assessments
+        if (assignment.getRemainingCount() <= 0) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Completed count cannot exceed the assigned frequency of "
-                            + assignment.getFrequency()
+                    "No remaining assessments to complete"
             );
         }
 
-        // Update completion counts
-        assignment.setCompletedCount(completedCount);
-        assignment.setRemainingCount(
-                assignment.getFrequency() - completedCount
+        // Increment completed count
+        assignment.setCompletedCount(
+                assignment.getCompletedCount() + 1
         );
+
+        // Decrement remaining count
+        assignment.setRemainingCount(
+                assignment.getRemainingCount() - 1
+        );
+
         assignment.setUpdatedAt(LocalDateTime.now());
 
-        // Persist changes
         TreatmentPlanAssessment updatedAssignment =
                 treatmentPlanAssessmentRepository.save(assignment);
 
-        // Return the updated assignment
         return mapToResponse(updatedAssignment);
     }
 }

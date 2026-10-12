@@ -22,4 +22,11 @@ public interface TreatmentPlanAssessmentService {
             Long treatmentPlanAssessmentId,
             AssessmentCompletionRequest request
     );
+
+    List<TreatmentPlanAssessmentResponse> getPendingAssessments(Long customerId);
+
+    TreatmentPlanAssessmentResponse completeAssessment(
+            Long customerId,
+            Long assessmentId
+    );
 }

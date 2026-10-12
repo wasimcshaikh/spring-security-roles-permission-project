@@ -72,4 +72,28 @@ public class TreatmentPlanAssessmentController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/pending-assessments")
+    public ResponseEntity<List<TreatmentPlanAssessmentResponse>> getPendingAssessmentNames(
+            @PathVariable Long customerId) {
+
+        return ResponseEntity.ok(
+                treatmentPlanAssessmentService
+                        .getPendingAssessments(customerId)
+        );
+    }
+
+    @PatchMapping("/{assessmentId}/complete")
+    public ResponseEntity<TreatmentPlanAssessmentResponse> completeAssessment(
+            @PathVariable Long customerId,
+            @PathVariable Long assessmentId) {
+
+        TreatmentPlanAssessmentResponse response =
+                treatmentPlanAssessmentService.completeAssessment(
+                        customerId,
+                        assessmentId
+                );
+
+        return ResponseEntity.ok(response);
+    }
 }

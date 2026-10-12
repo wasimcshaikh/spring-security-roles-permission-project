@@ -102,15 +102,18 @@ public class CustomerServiceImpl implements CustomerService {
                             "Active assessment not found with id: "
                                     + assessmentRequest.getAssessmentId()));
 
-            TreatmentPlanAssessment assignment = TreatmentPlanAssessment.builder()
-                    .customer(savedCustomer)
-                    .assessment(assessment)
-                    .frequency(assessmentRequest.getFrequency())
-                    .frequencyUnit(assessmentRequest.getFrequencyUnit())
-                    .active(true)
-                    .createdAt(now)
-                    .updatedAt(now)
-                    .build();
+            TreatmentPlanAssessment assignment =
+                    TreatmentPlanAssessment.builder()
+                            .customer(savedCustomer)
+                            .assessment(assessment)
+                            .frequency(assessmentRequest.getFrequency())
+                            .frequencyUnit(assessmentRequest.getFrequencyUnit())
+                            .completedCount(0)
+                            .remainingCount(assessmentRequest.getFrequency())
+                            .active(true)
+                            .createdAt(now)
+                            .updatedAt(now)
+                            .build();
 
             TreatmentPlanAssessment savedAssignment =
                     treatmentPlanAssessmentRepository.save(assignment);

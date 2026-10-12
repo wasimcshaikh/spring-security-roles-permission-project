@@ -22,4 +22,16 @@ public interface TreatmentPlanAssessmentRepository
             Long customerId,
             Long assessmentId
     );
+
+    List<TreatmentPlanAssessment>
+    findByCustomer_IdAndActiveTrueAndRemainingCountGreaterThanOrderByIdAsc(
+            Long customerId,
+            Integer remainingCount
+    );
+
+    Optional<TreatmentPlanAssessment>
+    findByCustomer_IdAndAssessment_IdAndActiveTrue(
+            Long customerId,
+            Long assessmentId
+    );
 }
