@@ -49,6 +49,7 @@ function CommonTable({
             {columns.map((column) => (
               <TableCell
                 key={column.field}
+                align="center"
                 sx={{
                   fontWeight: 800,
                   color: "#123b4a",
@@ -60,6 +61,7 @@ function CommonTable({
 
             {actions && (
               <TableCell
+                align="center"
                 sx={{
                   fontWeight: 800,
                   color: "#123b4a",
@@ -83,6 +85,7 @@ function CommonTable({
                   (actions ? 1 : 0)
                 }
                 align="center"
+                
                 sx={{
                   py: 4,
                 }}
@@ -108,6 +111,7 @@ function CommonTable({
 
                   <TableCell
                     key={column.field}
+                    align="center"
                   >
                     {column.renderCell
                       ? column.renderCell(row)
@@ -117,7 +121,7 @@ function CommonTable({
                 ))}
 
                 {actions && (
-                  <TableCell>
+                  <TableCell align="center">
                     {actions(row)}
                   </TableCell>
                 )}

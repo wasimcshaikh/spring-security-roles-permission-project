@@ -734,14 +734,23 @@ function CustomerProfile() {
                   </Alert>
                 )}
 
-                <CommonTable
-                  columns={assignmentColumns}
-                  rows={assignmentRows}
-                  actions={renderRowActions}
-                  rowKey="id"
-                  emptyMessage="No assessments are assigned to this customer."
-                  compact
-                />
+                <Box
+                  sx={{
+                    "& .MuiTableCell-root": {
+                      px: 1,
+                      py: 0.5,
+                    },
+                  }}
+                >
+                  <CommonTable
+                    columns={assignmentColumns}
+                    rows={assignmentRows}
+                    actions={renderRowActions}
+                    rowKey="id"
+                    emptyMessage="No assessments are assigned to this customer."
+                    compact
+                  />
+                </Box>
               </>
             )}
           </Paper>
