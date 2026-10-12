@@ -95,3 +95,6 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/changes/032-create-treatment-plan-assessment.yaml
+
+  - include:
+      file: db/changelog/changes/033-add-completed-remaining-count.yaml

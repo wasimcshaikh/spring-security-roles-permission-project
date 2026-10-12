@@ -1,3 +1,4 @@
+
 package medislot_provider_verification.dto;
 
 import medislot_provider_verification.entity.FrequencyUnit;
@@ -13,6 +14,8 @@ public class TreatmentPlanAssessmentResponse {
     private String organisation;
     private Integer frequency;
     private FrequencyUnit frequencyUnit;
+    private Integer completedCount;
+    private Integer remainingCount;
     private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -25,6 +28,8 @@ public class TreatmentPlanAssessmentResponse {
             String organisation,
             Integer frequency,
             FrequencyUnit frequencyUnit,
+            Integer completedCount,
+            Integer remainingCount,
             Boolean active,
             LocalDateTime createdAt,
             LocalDateTime updatedAt) {
@@ -36,6 +41,8 @@ public class TreatmentPlanAssessmentResponse {
         this.organisation = organisation;
         this.frequency = frequency;
         this.frequencyUnit = frequencyUnit;
+        this.completedCount = completedCount;
+        this.remainingCount = remainingCount;
         this.active = active;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -67,6 +74,14 @@ public class TreatmentPlanAssessmentResponse {
 
     public FrequencyUnit getFrequencyUnit() {
         return frequencyUnit;
+    }
+
+    public Integer getCompletedCount() {
+        return completedCount;
+    }
+
+    public Integer getRemainingCount() {
+        return remainingCount;
     }
 
     public Boolean getActive() {

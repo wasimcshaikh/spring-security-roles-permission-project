@@ -44,6 +44,12 @@ public class TreatmentPlanAssessment {
     )
     private FrequencyUnit frequencyUnit;
 
+    @Column(name = "completed_count", nullable = false)
+    private Integer completedCount;
+
+    @Column(name = "remaining_count", nullable = false)
+    private Integer remainingCount;
+
     @Column(name = "active", nullable = false)
     private Boolean active;
 

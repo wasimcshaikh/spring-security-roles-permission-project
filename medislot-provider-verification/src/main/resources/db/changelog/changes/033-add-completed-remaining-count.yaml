@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 033-add-completed-remaining-count
+      author: wasim
+      changes:
+        - addColumn:
+            tableName: treatment_plan_assessment
+            columns:
+              - column:
+                  name: completed_count
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: remaining_count
+                  type: INT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+
+      rollback:
+        - dropColumn:
+            tableName: treatment_plan_assessment
+            columnName: completed_count
+        - dropColumn:
+            tableName: treatment_plan_assessment
+            columnName: remaining_count

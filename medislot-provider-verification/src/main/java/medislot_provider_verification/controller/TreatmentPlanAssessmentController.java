@@ -1,6 +1,7 @@
 package medislot_provider_verification.controller;
 
 import jakarta.validation.Valid;
+import medislot_provider_verification.dto.AssessmentCompletionRequest;
 import medislot_provider_verification.dto.TreatmentPlanAssessmentRequest;
 import medislot_provider_verification.dto.TreatmentPlanAssessmentResponse;
 import medislot_provider_verification.service.TreatmentPlanAssessmentService;
@@ -53,5 +54,22 @@ public class TreatmentPlanAssessmentController {
                 treatmentPlanAssessmentService
                         .getCustomerAssessments(customerId)
         );
+    }
+
+
+    @PatchMapping("/{treatmentPlanAssessmentId}/completion")
+    public ResponseEntity<TreatmentPlanAssessmentResponse> markAssessmentCompleted(
+            @PathVariable Long customerId,
+            @PathVariable Long treatmentPlanAssessmentId,
+            @Valid @RequestBody AssessmentCompletionRequest request) {
+
+        TreatmentPlanAssessmentResponse response =
+                treatmentPlanAssessmentService.markAssessmentCompleted(
+                        customerId,
+                        treatmentPlanAssessmentId,
+                        request
+                );
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,5 +1,6 @@
 package medislot_provider_verification.service;
 
+import medislot_provider_verification.dto.AssessmentCompletionRequest;
 import medislot_provider_verification.dto.TreatmentPlanAssessmentRequest;
 import medislot_provider_verification.dto.TreatmentPlanAssessmentResponse;
 
@@ -14,5 +15,11 @@ public interface TreatmentPlanAssessmentService {
 
     List<TreatmentPlanAssessmentResponse> getCustomerAssessments(
             Long customerId
+    );
+
+    TreatmentPlanAssessmentResponse markAssessmentCompleted(
+            Long customerId,
+            Long treatmentPlanAssessmentId,
+            AssessmentCompletionRequest request
     );
 }

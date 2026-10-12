@@ -1,4 +1,3 @@
-
 package medislot_provider_verification.service;
 
 import medislot_provider_verification.dto.CustomerRequest;
@@ -208,6 +207,8 @@ public class CustomerServiceImpl implements CustomerService {
                 assignment.getAssessment().getOrganisation(),
                 assignment.getFrequency(),
                 assignment.getFrequencyUnit(),
+                assignment.getCompletedCount(),
+                assignment.getRemainingCount(),
                 assignment.getActive(),
                 assignment.getCreatedAt(),
                 assignment.getUpdatedAt()

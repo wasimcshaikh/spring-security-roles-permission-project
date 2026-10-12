@@ -13,6 +13,7 @@ import {
   FormControl,
   IconButton,
   InputLabel,
+  Menu,
   MenuItem,
   Paper,
   Select,
@@ -21,6 +22,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
 import EmailIcon from "@mui/icons-material/Email";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PhoneIcon from "@mui/icons-material/Phone";
@@ -55,6 +57,39 @@ const getApiErrorMessage = (error, fallback) => {
   return error.message || fallback;
 };
 
+const formatColumnName = (field) => {
+  if (field === "assessmentName") {
+    return "Title";
+  }
+
+  return field
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/^./, (character) => character.toUpperCase());
+};
+
+const formatAssignmentValue = (value, field) => {
+  if (value === null || value === undefined || value === "") {
+    return "—";
+  }
+
+  if (typeof value === "boolean") {
+    if (field === "active") {
+      return value ? "Active" : "Inactive";
+    }
+    return value ? "Yes" : "No";
+  }
+
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    return value.split("T")[0];
+  }
+
+  if (typeof value === "object") {
+    return JSON.stringify(value);
+  }
+
+  return value;
+};
+
 function CustomerProfile() {
   const { customerId } = useParams();
   const navigate = useNavigate();
@@ -66,9 +101,15 @@ function CustomerProfile() {
   const [error, setError] = useState("");
   const [assessmentOptionsError, setAssessmentOptionsError] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [completionDialogOpen, setCompletionDialogOpen] = useState(false);
+  const [actionMenuAnchor, setActionMenuAnchor] = useState(null);
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [completedCount, setCompletedCount] = useState("");
   const [assignmentForm, setAssignmentForm] = useState(emptyAssignment);
   const [formError, setFormError] = useState("");
+  const [completionError, setCompletionError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [savingCompletion, setSavingCompletion] = useState(false);
   const [success, setSuccess] = useState("");
 
   const availableAssessments = useMemo(
@@ -250,44 +291,125 @@ function CustomerProfile() {
     }
   };
 
-  const assignmentColumns = [
-    { field: "id", headerName: "ID" },
-    { field: "customerId", headerName: "Customer ID" },
-    { field: "assessmentId", headerName: "Assessment ID" },
-    { field: "assessmentName", headerName: "Title" },
-    { field: "organisation", headerName: "Organisation" },
-    { field: "frequency", headerName: "Number of Times" },
-    { field: "frequencyUnit", headerName: "Frequency" },
-    { field: "active", headerName: "Status" },
-    { field: "createdAt", headerName: "Created At" },
-    { field: "updatedAt", headerName: "Updated At" },
+  const openAssignmentActions = (event, assignment) => {
+    setActionMenuAnchor(event.currentTarget);
+    setSelectedAssignment(assignment);
+  };
+
+  const closeAssignmentActions = () => {
+    setActionMenuAnchor(null);
+  };
+
+  const openCompletionDialog = () => {
+    if (!selectedAssignment) {
+      return;
+    }
+
+    setCompletedCount(String(selectedAssignment.completedCount ?? 0));
+    setCompletionError("");
+    setCompletionDialogOpen(true);
+    closeAssignmentActions();
+  };
+
+  const closeCompletionDialog = () => {
+    if (!savingCompletion) {
+      setCompletionDialogOpen(false);
+      setCompletionError("");
+      setSelectedAssignment(null);
+    }
+  };
+
+  const handleSaveCompletion = async (event) => {
+    event.preventDefault();
+    setCompletionError("");
+
+    const newCompletedCount = Number(completedCount);
+    const frequency = Number(selectedAssignment?.frequency);
+    if (
+      !selectedAssignment ||
+      completedCount === "" ||
+      !Number.isInteger(newCompletedCount) ||
+      newCompletedCount < 0 ||
+      !Number.isInteger(frequency) ||
+      newCompletedCount > frequency
+    ) {
+      setCompletionError(
+        `Enter a whole number between 0 and ${frequency || 0}.`
+      );
+      return;
+    }
+
+    try {
+      setSavingCompletion(true);
+      const response = await axiosInstance.patch(
+        `/api/admin/customers/assessments/${customerId}/${selectedAssignment.id}/completion`,
+        { completedCount: newCompletedCount }
+      );
+
+      if (
+        !response.data ||
+        String(response.data.id) !== String(selectedAssignment.id)
+      ) {
+        throw new Error("The completion update response was invalid.");
+      }
+
+      setAssignments((current) =>
+        current.map((assignment) =>
+          String(assignment.id) === String(response.data.id)
+            ? response.data
+            : assignment
+        )
+      );
+      setSuccess("Assessment completion updated successfully.");
+      setCompletionDialogOpen(false);
+      setSelectedAssignment(null);
+    } catch (submitError) {
+      console.error("Failed to update assessment completion:", submitError);
+      setCompletionError(
+        getApiErrorMessage(
+          submitError,
+          "Unable to update assessment completion."
+        )
+      );
+    } finally {
+      setSavingCompletion(false);
+    }
+  };
+
+  const assignmentFields = [
+    ...new Set(assignments.flatMap((assignment) => Object.keys(assignment))),
   ];
-  const assignmentRows = assignments.map((assignment) => ({
-    ...assignment,
-    assessmentName: assignment.assessmentName || "—",
-    organisation: assignment.organisation || "—",
-    frequency: assignment.frequency ?? "—",
-    frequencyUnit: assignment.frequencyUnit || "—",
-    active:
-      typeof assignment.active === "boolean"
-        ? assignment.active
-          ? "Active"
-          : "Inactive"
-        : "—",
-    createdAt:
-      typeof assignment.createdAt === "string"
-        ? assignment.createdAt.split("T")[0]
-        : "—",
-    updatedAt:
-      typeof assignment.updatedAt === "string"
-        ? assignment.updatedAt.split("T")[0]
-        : "—",
+  const assignmentColumns = assignmentFields.map((field) => ({
+    field,
+    headerName: formatColumnName(field),
   }));
-  const renderRowActions = () => (
-    <IconButton aria-label="Assessment actions">
-      <MoreVertIcon />
-    </IconButton>
+  const assignmentRows = assignments.map((assignment) =>
+    Object.fromEntries(
+      assignmentFields.map((field) => [
+        field,
+        formatAssignmentValue(assignment[field], field),
+      ])
+    )
   );
+  const renderRowActions = (row) => {
+    const assignment = assignments.find(
+      (item) => String(item.id) === String(row.id)
+    );
+
+    return (
+      <IconButton
+        aria-label="Assessment actions"
+        aria-haspopup="menu"
+        onClick={(event) => {
+          if (assignment) {
+            openAssignmentActions(event, assignment);
+          }
+        }}
+      >
+        <MoreVertIcon />
+      </IconButton>
+    );
+  };
 
   if (loading) {
     return (
@@ -482,6 +604,87 @@ function CustomerProfile() {
           </Paper>
         </>
       )}
+
+      <Menu
+        anchorEl={actionMenuAnchor}
+        open={Boolean(actionMenuAnchor)}
+        onClose={closeAssignmentActions}
+      >
+        <MenuItem onClick={openCompletionDialog}>
+          <EditIcon fontSize="small" sx={{ mr: 1 }} />
+          Edit
+        </MenuItem>
+      </Menu>
+
+      <Dialog
+        open={completionDialogOpen}
+        onClose={closeCompletionDialog}
+        fullWidth
+        maxWidth="xs"
+      >
+        <Box component="form" onSubmit={handleSaveCompletion}>
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            Mark Assessment Completed
+            <IconButton
+              aria-label="Close dialog"
+              onClick={closeCompletionDialog}
+              disabled={savingCompletion}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ display: "grid", gap: 2, pt: "8px !important" }}>
+            {completionError && (
+              <Alert severity="error">{completionError}</Alert>
+            )}
+            <Typography variant="body2" color="text.secondary">
+              {selectedAssignment?.assessmentName
+                ? `Enter how many ${selectedAssignment.assessmentName} assessments have been completed.`
+                : "Enter the completed assessment count."}
+            </Typography>
+            <TextField
+              label="Completed count"
+              type="number"
+              value={completedCount}
+              onChange={(event) => setCompletedCount(event.target.value)}
+              inputProps={{
+                min: 0,
+                max: selectedAssignment?.frequency,
+                step: 1,
+              }}
+              helperText={`Enter a whole number from 0 to ${
+                selectedAssignment?.frequency ?? 0
+              }.`}
+              required
+              fullWidth
+              disabled={savingCompletion}
+            />
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <CommonButton
+              text="Cancel"
+              variant="outlined"
+              fullWidth={false}
+              size="medium"
+              onClick={closeCompletionDialog}
+              disabled={savingCompletion}
+            />
+            <CommonButton
+              text={savingCompletion ? "Saving..." : "Save"}
+              type="submit"
+              fullWidth={false}
+              size="medium"
+              disabled={savingCompletion || !selectedAssignment}
+            />
+          </DialogActions>
+        </Box>
+      </Dialog>
 
       <Dialog
         open={dialogOpen}
