@@ -93,7 +93,7 @@ function CustomerCompliance({ assignments }) {
               sx={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: 1,
+                gap: 2,
                 mb: 1.5,
               }}
             >
@@ -167,7 +167,7 @@ function CustomerCompliance({ assignments }) {
 
 function ComplianceMetric({ label, value }) {
   return (
-    <Box sx={{ minWidth: 0 }}>
+    <Box sx={{ minWidth: 0 , }}>
       <Typography variant="caption" color="text.secondary">
         {label}
       </Typography>

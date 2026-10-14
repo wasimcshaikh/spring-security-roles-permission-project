@@ -138,7 +138,13 @@ function ViewProviders() {
         </Box>
       ) : (
         <>
-          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+          <Box
+            sx={{
+              display: { xs: "none", sm: "block" },
+              width: "85%",
+              mx: "auto",
+            }}
+          >
             <CommonTable
               columns={columns}
               rows={providers}
@@ -151,10 +157,7 @@ function ViewProviders() {
           <Box
             sx={{
               display: { xs: "grid", sm: "none" },
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "repeat(2, minmax(0, 1fr))",
-              },
+              gridTemplateColumns: "1fr",
               gap: 1.25,
             }}
           >

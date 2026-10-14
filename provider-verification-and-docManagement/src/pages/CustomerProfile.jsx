@@ -716,7 +716,7 @@ function CustomerProfile() {
                       ? loadingAssessments
                       : completingAssessment
                   }
-                  sx={{ whiteSpace: "nowrap" }}
+                  sx={{ whiteSpace: "nowrap" , width: { xs: "50%", sm: "auto" } , fontSize: { xs: "0.75rem" , lg: "0.875rem" } }}
                 />
               )}
             </Box>
@@ -739,6 +739,7 @@ function CustomerProfile() {
                     "& .MuiTableCell-root": {
                       px: 1,
                       py: 0.5,
+                      
                     },
                   }}
                 >
