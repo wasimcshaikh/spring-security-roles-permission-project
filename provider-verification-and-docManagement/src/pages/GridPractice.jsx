@@ -1,126 +1,111 @@
 import { Box, Typography } from "@mui/material";
+import React from "react";
 
-const GridPractice = () => (
-  <Box
-    sx={{
-      p: { xs: 2, sm: 3 },
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column",
-    }}
-  >
-    <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
-      Grid Practice
-    </Typography>
+const GridPractice = () => {
+  return (
     <Box
       sx={{
-        display: "grid",
-        height: "100%",
-        // justifyContent: "center",
-
-        // gridTemplateColumns: {
-        //   xs: "1fr",
-        //   sm: "repeat(2, minmax(0, 1fr))",
-        //   md: "repeat(3, minmax(0, 1fr))",
-        // },
-        gridTemplateAreas: {
-          xs: `
-            "first"
-            "second"
-            "second"
-            "third"
-            "fourth"
-            "fifth"
-          `,
-          sm: `
-            "first first"
-            "second third"
-            "second fourth"
-            " fifth fifth"
-          `,
-          md: `
-            "first first first"
-            "second third fourth"
-            ". fifth ."
-          `,
-        },
-        gridTemplateRows: {
-          xs: "160px 280px 280px 280px 480px 160px",
-          sm: "160px 360px 200px 280px",
-          md: "160px 280px 160px",
-        },
-        gap: "10px",
-        bgcolor: "rgb(61, 22, 3)",
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: "primary.main",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <Box
         sx={{
-          minHeight: 160,
-          border: "2px solid rgba(7, 7, 7, 0.45)",
-          gridArea: "first",
-          bgcolor: "lightcoral",
+          height: "15%",
+          width: "90%",
+          padding: 4,
+          border: "2px solid #ffffff",
+          m: 2,
+          display: "flex",
+          alignItems: "center",
         }}
       >
-        {" "}
-        first
+        <Typography sx={{ fontSize: "2rem", fontWeight: 600 }}>
+          Grid Practice
+        </Typography>
       </Box>
       <Box
         sx={{
-          minWidth: 160,
-          minHeight: 160,
-          border: "2px solid rgba(7, 7, 7, 0.45)",
-          gridArea: "second",
-          bgcolor: "lightgray",
+          height: "80%",
+          width: "90%",
+          border: "2px solid #ffffff",
+          padding: 4,
+          m: 2,
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            sm: "1fr 1fr",
+            md: "repeat(4, minmax(0, 1fr))",
           },
-          gap: "10px",
-          
+          gap: 2,
         }}
       >
-        <Box sx={{m: 1, border: "2px solid rgba(7, 7, 7, 0.45)", p: 2 }}>21</Box>
-        <Box sx={{m: 1, border: "2px solid rgba(7, 7, 7, 0.45)", p: 2 }}>22</Box>
-        <Box sx={{m: 1, border: "2px solid rgba(7, 7, 7, 0.45)", p: 2 }}>23</Box>
-        <Box sx={{m: 1, border: "2px solid rgba(7, 7, 7, 0.45)", p: 2 }}>24</Box>
-        <Box sx={{m: 1, border: "2px solid rgba(7, 7, 7, 0.45)", p: 2 }}>25</Box>
-        <Box sx={{m: 1, border: "2px solid rgba(7, 7, 7, 0.45)", p: 2 }}>26</Box>
-      </Box>
-      <Box
-        sx={{
-          minHeight: 160,
-          border: "2px solid rgba(7, 7, 7, 0.45)",
-          gridArea: "third",
-          bgcolor: "lightblue",
-        }}
-      >
-        third
-      </Box>
-      <Box
-        sx={{
-          minHeight: 160,
-          border: "2px solid rgba(7, 7, 7, 0.45)",
-          gridArea: "fourth",
-          bgcolor: "lightgreen",
-        }}
-      >
-        {" "}
-        fourth{" "}
-      </Box>
-      <Box
-        sx={{
-          minHeight: 160,
-          border: "2px solid rgba(7, 7, 7, 0.45)",
-          gridArea: "fifth",
-          bgcolor: "yellow",
-        }}
-      >
-        {" "}
-        fifth{" "}
+        <Box
+          sx={{
+            border: "2px solid rgba(7, 7, 7, 0.45)",
+            bgcolor: "lightcoral",
+            gridColumn: {
+              xs: "1 / -1",
+              md: "1 / -1",
+            },
+            gridRow: "span 2",
+          }}
+        >
+          first
+        </Box>
+        <Box
+          sx={{
+            border: "2px solid rgba(7, 7, 7, 0.45)",
+            bgcolor: "lightcoral",
+            gridColumn: {
+              xs: "1 / -1",
+              md: "1 / 3",
+            },
+          }}
+        >
+          second
+        </Box>
+        <Box
+          sx={{
+            border: "2px solid rgba(7, 7, 7, 0.45)",
+            bgcolor: "lightcoral",
+            gridColumn: {
+              xs: "1 / -1",
+              md: "3 / 5",
+            }
+          }}
+        >
+          third
+        </Box>
+        <Box
+          sx={{
+            border: "2px solid rgba(7, 7, 7, 0.45)",
+            bgcolor: "lightcoral",
+            gridColumn: {
+              xs: "1 / -1",
+              md: "1 / 5",
+            },
+          }}
+        >
+          fourth
+        </Box>
+        <Box
+          sx={{
+            border: "2px solid rgba(7, 7, 7, 0.45)",
+            bgcolor: "lightcoral",
+            gridColumn: {
+              xs: "1 / -1",
+              md: "2 / 4",
+            },
+          }}
+        >
+          fifth
+        </Box>
       </Box>
     </Box>
-  </Box>
-);
+  );
+};
 
 export default GridPractice;
